@@ -1,26 +1,159 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   HANNAH STYLE — DESIGN TOKEN
+   Бүх өнгө, фонт ЭНД нэг удаа тодорхойлогдоно.
+   Component дотор хатуу өнгө (#000 гэх мэт) бичихгүй.
+   ============================================================ */
 
 @theme inline {
+  /* --- Брэндийн өнгө (Tailwind: bg-bone, text-ink, border-line ...) --- */
+  --color-bone: var(--bone);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-sand: var(--sand);
+  --color-line: var(--line);
+  --color-sale: var(--sale);
+
+  /* --- Фонт --- */
+  --font-sans: var(--font-body);       /* Inter — энгийн текст */
+  --font-display: var(--font-heading-face); /* Jost — гарчиг, товч, лого */
+  --font-mono: var(--font-geist-mono);
+
+  /* --- Үсгийн зай: tracking-label --- */
+  --tracking-label: 0.18em;
+  --tracking-wordmark: 0.3em;
+
+  /* --- shadcn/ui-д шаардлагатай token-ууд --- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Premium fashion = дугуйруулалтгүй. Бүх radius 0. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Брэндийн үндсэн 6 өнгө */
+  --bone: #f2f1ed;      /* дулаан цагаан — хуудасны дэвсгэр */
+  --ink: #111110;       /* бараг хар — текст, товч */
+  --graphite: #6b6862;  /* саарал — хоёрдогч текст */
+  --sand: #e4e0d6;      /* элсэн — гадаргуу, hover */
+  --line: #dedbd3;      /* зураас, хүрээ */
+  --sale: #9e2b1e;      /* улаан — ЗӨВХӨН хямдралд */
+
+  --radius: 0rem;
+
+  /* shadcn token-уудыг брэндийн өнгө рүү холбоно */
+  --background: var(--bone);
+  --foreground: var(--ink);
+  --card: #faf9f6;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--bone);
+  --secondary: var(--sand);
+  --secondary-foreground: var(--ink);
+  --muted: #e9e6de;
+  --muted-foreground: var(--graphite);
+  --accent: var(--sand);
+  --accent-foreground: var(--ink);
+  --destructive: var(--sale);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--ink);
+
+  /* Админы график — монохром */
+  --chart-1: #111110;
+  --chart-2: #4a4842;
+  --chart-3: #6b6862;
+  --chart-4: #9c988e;
+  --chart-5: #c6c1b5;
+
+  /* Админы sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: var(--bone);
+  --sidebar-accent: var(--sand);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--ink);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+  /* Гараар табладаг хүнд фокус харагдах ёстой */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ink;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Дахин ашиглагдах жижиг utility
+   ============================================================ */
+
+/* Navbar, eyebrow, товчны жижиг ТОМ ҮСЭГТЭЙ бичиг */
+@utility label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  font-size: 0.6875rem;  /* 11px */
+  line-height: 1.4;
+}
+
+/* Хуудасны стандарт хажуугийн зай */
+@utility container-shop {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 90rem;      /* 1440px */
+  padding-inline: 1.25rem;
+  @media (width >= 48rem) { padding-inline: 2.5rem; }
 }

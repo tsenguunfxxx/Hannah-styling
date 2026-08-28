@@ -1,0 +1,762 @@
+<title>Hannah Style Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    --bone:#EFEDE7;
+    --paper:#F6F5F1;
+    --ink:#161614;
+    --graphite:#615E56;
+    --line:#D7D3C9;
+    --sand:#E3DFD4;
+    --accent:#2F4858;
+    --accent-soft:#DCE3E7;
+    --bg:var(--bone);
+    --surface:var(--paper);
+    --fg:var(--ink);
+    --muted:var(--graphite);
+    --rule:var(--line);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#131312;
+      --surface:#1B1B19;
+      --fg:#EBE8E0;
+      --muted:#9B968B;
+      --rule:#302F2B;
+      --sand:#26251F;
+      --accent:#8FB2C6;
+      --accent-soft:#22323C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#131312;
+    --surface:#1B1B19;
+    --fg:#EBE8E0;
+    --muted:#9B968B;
+    --rule:#302F2B;
+    --sand:#26251F;
+    --accent:#8FB2C6;
+    --accent-soft:#22323C;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:"Newsreader",Georgia,serif;
+    font-size:17px;
+    line-height:1.65;
+    margin:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px 120px}
+
+  /* ---------- masthead ---------- */
+  .bar{
+    background:var(--ink);
+    color:var(--bone);
+    font-family:"Archivo",system-ui,sans-serif;
+    font-size:10px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    padding:10px 28px;
+    display:flex;
+    gap:28px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .bar span{opacity:.75}
+  header.mast{
+    border-bottom:1px solid var(--rule);
+    padding:64px 0 40px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+  .wordmark{
+    font-family:"Archivo",system-ui,sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.3em;
+    font-size:clamp(30px,7vw,64px);
+    line-height:1;
+    margin:0;
+    text-wrap:balance;
+  }
+  .lede{
+    font-size:clamp(18px,2.4vw,22px);
+    max-width:60ch;
+    color:var(--muted);
+    margin:0;
+    font-weight:300;
+  }
+  .meta{
+    display:flex;flex-wrap:wrap;gap:8px 26px;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ---------- layout ---------- */
+  .cols{display:grid;grid-template-columns:190px minmax(0,1fr);gap:56px;align-items:start}
+  nav.toc{
+    position:sticky;top:24px;
+    display:flex;flex-direction:column;gap:9px;
+    padding-top:56px;
+    font-family:"Archivo",system-ui,sans-serif;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  }
+  nav.toc a{color:var(--muted);text-decoration:none;display:flex;gap:10px;padding:2px 0;border-bottom:1px solid transparent}
+  nav.toc a:hover{color:var(--fg);border-bottom-color:var(--fg)}
+  nav.toc a b{color:var(--accent);font-weight:500;font-family:"IBM Plex Mono",monospace}
+  nav.toc a:focus-visible,.wrap a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  section{padding:56px 0;border-bottom:1px solid var(--rule)}
+  section:last-of-type{border-bottom:0}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);
+    margin:0 0 14px;display:flex;gap:12px;align-items:center;
+  }
+  h2{
+    font-family:"Archivo",system-ui,sans-serif;
+    font-weight:500;text-transform:uppercase;letter-spacing:.14em;
+    font-size:clamp(20px,3vw,27px);line-height:1.25;margin:0 0 20px;text-wrap:balance;
+  }
+  h3{
+    font-family:"Archivo",system-ui,sans-serif;
+    font-weight:500;font-size:15px;letter-spacing:.1em;text-transform:uppercase;
+    margin:36px 0 12px;
+  }
+  p{max-width:68ch;margin:0 0 16px}
+  ul,ol{max-width:68ch;padding-left:20px;margin:0 0 16px}
+  li{margin-bottom:7px}
+  strong{font-weight:500;color:var(--fg)}
+  code{
+    font-family:"IBM Plex Mono",monospace;font-size:.84em;
+    background:var(--sand);padding:1px 5px;border:1px solid var(--rule);
+  }
+  a.inline{color:var(--accent)}
+
+  pre{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12.5px;line-height:1.75;
+    background:var(--surface);
+    border:1px solid var(--rule);
+    border-left:2px solid var(--accent);
+    padding:20px 22px;margin:0 0 20px;
+    overflow-x:auto;
+  }
+  pre code{background:none;border:0;padding:0;font-size:inherit}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px;margin-bottom:20px}
+  .card{border:1px solid var(--rule);background:var(--surface);padding:20px}
+  .card h4{
+    font-family:"Archivo",sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    margin:0 0 10px;font-weight:500;
+  }
+  .card p{font-size:15px;margin:0;color:var(--muted)}
+
+  .tablewrap{overflow-x:auto;border:1px solid var(--rule);margin-bottom:20px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+  th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{
+    font-family:"Archivo",sans-serif;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    font-weight:500;color:var(--muted);background:var(--sand);
+  }
+  tr:last-child td{border-bottom:0}
+  td code{background:none;border:0;padding:0;color:var(--accent)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* diagram plate: intentionally one constant light surface in both themes */
+  .plate{
+    background:#F6F5F1;border:1px solid #D7D3C9;
+    padding:22px;margin:0 0 20px;overflow-x:auto;
+  }
+  .plate .mermaid{background:none}
+  .platecap{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);margin:-8px 0 24px;
+  }
+
+  .note{
+    border-left:2px solid var(--accent);background:var(--accent-soft);
+    padding:16px 20px;margin:0 0 20px;font-size:15.5px;
+  }
+  .note p{margin:0;max-width:none}
+  .note b{font-family:"Archivo",sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;display:block;margin-bottom:6px}
+
+  .phases{list-style:none;padding:0;max-width:none}
+  .phases li{
+    display:grid;grid-template-columns:52px 1fr auto;gap:16px;align-items:baseline;
+    padding:11px 0;border-bottom:1px solid var(--rule);margin:0;
+  }
+  .phases li b{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);font-weight:400}
+  .phases li span.t{font-family:"Archivo",sans-serif;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase}
+  .phases li em{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .phases li.now em{color:var(--bone);background:var(--ink);padding:3px 8px}
+  :root[data-theme="dark"] .phases li.now em,
+  :root:not([data-theme="light"]) .phases li.now em{color:#131312;background:var(--fg)}
+
+  .swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0;border:1px solid var(--rule);margin-bottom:20px}
+  .sw{padding:18px 14px;border-right:1px solid var(--rule);font-family:"IBM Plex Mono",monospace;font-size:10.5px;line-height:1.7}
+  .sw:last-child{border-right:0}
+  .sw i{display:block;height:46px;margin-bottom:10px;border:1px solid rgba(0,0,0,.12)}
+  .sw b{display:block;letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+  .sw span{color:var(--muted)}
+
+  footer.end{padding:48px 0 0;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+  @media (max-width:880px){
+    .cols{grid-template-columns:1fr;gap:0}
+    nav.toc{position:static;flex-direction:row;flex-wrap:wrap;gap:6px 18px;padding:28px 0 0;border-bottom:1px solid var(--rule);padding-bottom:24px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="bar">
+  <span>Next.js 16 · App Router</span><span>Prisma · Neon Postgres</span><span>Auth.js</span><span>Tailwind v4 · shadcn/ui</span><span>Cloudinary</span>
+</div>
+
+<div class="wrap">
+  <header class="mast">
+    <p class="meta"><span>Техникийн төлөвлөгөө</span><span>2026.08.24</span><span>Хувилбар 01</span></p>
+    <h1 class="wordmark">Hannah Style</h1>
+    <p class="lede">Хувцасны онлайн дэлгүүрийн бүтэн архитектур — folder бүтэц, хуудасны газрын зураг, өгөгдлийн сангийн ERD, хэрэглэгч болон админы урсгал, 16 үе шаттай зам.</p>
+  </header>
+
+  <div class="cols">
+    <nav class="toc">
+      <a href="#s1"><b>01</b> Тойм</a>
+      <a href="#s2"><b>02</b> Folder</a>
+      <a href="#s3"><b>03</b> Хуудсууд</a>
+      <a href="#s4"><b>04</b> ERD</a>
+      <a href="#s5"><b>05</b> Холбоос</a>
+      <a href="#s6"><b>06</b> Хэрэглэгч</a>
+      <a href="#s7"><b>07</b> Үлдэгдэл</a>
+      <a href="#s8"><b>08</b> Захиалга</a>
+      <a href="#s9"><b>09</b> Админ</a>
+      <a href="#s10"><b>10</b> Дизайн</a>
+      <a href="#s11"><b>11</b> Замын зураг</a>
+    </nav>
+
+    <main>
+
+    <section id="s1">
+      <p class="eyebrow">01 — Тойм</p>
+      <h2>Систем ерөнхийдөө хэрхэн ажиллах вэ</h2>
+      <p>Энэ бол <strong>нэг Next.js төсөл</strong>. Frontend, backend хоёр тусдаа сервер биш — нэг код дотор хамт байна. Next.js-ийн App Router нь өгөгдлийг серверт татаж, бэлэн HTML-ийг хөтөч рүү илгээдэг тул хурдан бөгөөд SEO сайн байна.</p>
+
+      <p>Кодыг ойлгоход хамгийн чухал зүйл бол <strong>гурван давхарга</strong>. Энэ дүрмийг барьвал төсөл хэзээ ч замбараагүй болохгүй:</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>1 — UI давхарга</h4>
+          <p><code>app/</code> ба <code>components/</code>. Зөвхөн харагдах байдал. Энд <code>prisma</code> шууд дуудахгүй, SQL бичихгүй.</p>
+        </div>
+        <div class="card">
+          <h4>2 — Логик давхарга</h4>
+          <p><code>lib/queries/</code> — өгөгдөл <em>унших</em>. <code>actions/</code> — өгөгдөл <em>бичих</em> (Server Actions). Эрх шалгах, Zod-оор шалгах бүх ажил энд.</p>
+        </div>
+        <div class="card">
+          <h4>3 — Өгөгдлийн давхарга</h4>
+          <p><code>prisma/schema.prisma</code> ба Neon Postgres. Зөвхөн 2-р давхаргаас хандана.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        <p><b>Яагаад ингэж хуваадаг вэ</b>Хэрэв component дотроо шууд database дууддаг бол нэг өдөр "энэ үнэ хаанаас ирээд байна аа?" гэж 40 файл ухах болно. Гурван давхарга нь: харагдах юм <code>components/</code>-д, бодох юм <code>actions/</code>-д, хадгалах юм <code>prisma/</code>-д гэсэн энгийн дүрэм.</p>
+      </div>
+
+      <h3>Server Component vs Client Component</h3>
+      <p>Next.js-д component бүр анхнаасаа <strong>Server Component</strong>. Энэ нь серверт ажиллаад database руу шууд хандаж чадна, гэхдээ <code>onClick</code>, <code>useState</code> ашиглаж чадахгүй. Дээр нь <code>"use client"</code> бичвэл <strong>Client Component</strong> болж, интерактив болдог ч database руу хандаж чадахгүй.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Юу хийх вэ</th><th>Ямар component</th><th>Жишээ</th></tr></thead>
+          <tbody>
+            <tr><td>Барааны жагсаалт татаж харуулах</td><td>Server</td><td><code>ShopPage</code>, <code>ProductGrid</code></td></tr>
+            <tr><td>Размер сонгох, тоо нэмэх</td><td>Client</td><td><code>VariantPicker</code>, <code>QuantityInput</code></td></tr>
+            <tr><td>Filter-ийн checkbox</td><td>Client (URL-д бичнэ)</td><td><code>ShopFilters</code></td></tr>
+            <tr><td>Сагсанд нэмэх үйлдэл</td><td>Server Action</td><td><code>actions/cart.ts</code></td></tr>
+            <tr><td>Админ статистик</td><td>Server</td><td><code>admin/page.tsx</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="s2">
+      <p class="eyebrow">02 — Folder structure</p>
+      <h2>Файлууд хаана байрлах вэ</h2>
+      <p>Хэрэглэгчийн хэсэг <code>(shop)</code> group дотор, админ <code>admin/</code> дотор — хоёр нь өөр layout, өөр эрхтэй тул бүрэн тусгаарлагдана.</p>
+<pre><code>hannah-style/
+├─ prisma/
+│  ├─ schema.prisma          # Бүх model энд
+│  └─ seed.ts                # Туршилтын өгөгдөл суулгах
+├─ public/                   # Static зураг, лого
+├─ docs/                     # Энэ баримт
+└─ src/
+   ├─ app/
+   │  ├─ (shop)/             # Хэрэглэгчийн layout: Navbar + Footer
+   │  │  ├─ layout.tsx
+   │  │  ├─ page.tsx                    # Нүүр
+   │  │  ├─ shop/page.tsx               # Бүх бараа + filter
+   │  │  ├─ product/[slug]/page.tsx     # Барааны дэлгэрэнгүй
+   │  │  ├─ search/page.tsx             # Хайлтын үр дүн
+   │  │  ├─ cart/page.tsx
+   │  │  ├─ checkout/page.tsx
+   │  │  ├─ wishlist/page.tsx
+   │  │  └─ account/
+   │  │     ├─ page.tsx                 # Профайл
+   │  │     ├─ orders/page.tsx          # Миний захиалгууд
+   │  │     └─ orders/[id]/page.tsx     # Захиалгын төлөв
+   │  ├─ (auth)/             # Нэвтрэх layout: цэвэр, navbar-гүй
+   │  │  ├─ login/page.tsx
+   │  │  ├─ register/page.tsx
+   │  │  └─ forgot-password/page.tsx
+   │  ├─ admin/              # Админ layout: sidebar
+   │  │  ├─ layout.tsx                  # ЭНД эрх шалгана
+   │  │  ├─ page.tsx                    # Dashboard
+   │  │  ├─ products/                   # жагсаалт / new / [id]
+   │  │  ├─ orders/                     # жагсаалт / [id]
+   │  │  ├─ categories/page.tsx
+   │  │  └─ customers/page.tsx
+   │  ├─ api/
+   │  │  ├─ auth/[...nextauth]/route.ts
+   │  │  └─ webhooks/qpay/route.ts      # Банкнаас ирэх мэдэгдэл
+   │  ├─ layout.tsx          # Root: font, Toaster
+   │  ├─ globals.css         # Design token
+   │  ├─ loading.tsx / error.tsx / not-found.tsx
+   │
+   ├─ components/
+   │  ├─ ui/                 # shadcn: button, input, dialog, sheet...
+   │  ├─ layout/             # navbar, footer, mobile-menu, announcement-bar
+   │  ├─ product/            # product-card, product-grid, gallery, variant-picker
+   │  ├─ cart/               # cart-sheet, cart-item, quantity-input
+   │  ├─ admin/              # stat-card, sales-chart, data-table, product-form
+   │  └─ shared/             # price, empty-state, skeletons, pagination
+   │
+   ├─ actions/               # БИЧИХ үйлдэл — "use server"
+   │  ├─ auth.action.ts      # register, forgot password
+   │  ├─ cart.action.ts      # addToCart, updateQty, removeItem
+   │  ├─ order.action.ts     # createOrder, cancelOrder
+   │  ├─ wishlist.action.ts
+   │  ├─ review.action.ts
+   │  └─ admin/              # product, category, order — зөвхөн ADMIN
+   │
+   ├─ lib/
+   │  ├─ prisma.ts           # Prisma client (singleton)
+   │  ├─ auth.ts             # Auth.js тохиргоо
+   │  ├─ cloudinary.ts       # Зураг upload
+   │  ├─ utils.ts            # cn(), formatPrice(), slugify()
+   │  ├─ constants.ts        # SIZES, ORDER_STATUS, SHIPPING_FEE
+   │  └─ queries/            # УНШИХ үйлдэл
+   │     ├─ product.query.ts
+   │     ├─ order.query.ts
+   │     └─ stats.query.ts
+   │
+   ├─ schemas/               # Zod — монгол алдааны мессежтэй
+   │  ├─ auth.schema.ts
+   │  ├─ product.schema.ts
+   │  └─ checkout.schema.ts
+   │
+   ├─ hooks/                 # use-cart, use-debounce, use-media-query
+   ├─ types/index.ts         # Дундын TypeScript төрлүүд
+   └─ middleware.ts          # /admin, /account хамгаалалт</code></pre>
+
+      <div class="note">
+        <p><b>Нэршлийн дүрэм</b>Файлын нэр бүгд жижиг үсэг, зураасаар: <code>product-card.tsx</code>. Component-ийн нэр том үсгээр: <code>ProductCard</code>. Ингэснээр файлыг хайхад амар, git дээр Mac/Linux зөрөхгүй.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <p class="eyebrow">03 — Page structure</p>
+      <h2>Хуудас бүр юу хийх вэ</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Зам</th><th>Хуудас</th><th>Хэн</th><th>Онцлог</th></tr></thead>
+          <tbody>
+            <tr><td><code>/</code></td><td>Нүүр</td><td>Бүгд</td><td>Hero, New Arrivals, Best Sellers, Categories, Sale, Gallery, Newsletter</td></tr>
+            <tr><td><code>/shop</code></td><td>Дэлгүүр</td><td>Бүгд</td><td>Filter + sort нь URL-д хадгалагдана (<code>?category=&amp;size=&amp;sort=</code>)</td></tr>
+            <tr><td><code>/product/[slug]</code></td><td>Дэлгэрэнгүй</td><td>Бүгд</td><td>Зургийн галерей, өнгө/размер сонголт, үлдэгдэл, review</td></tr>
+            <tr><td><code>/search?q=</code></td><td>Хайлт</td><td>Бүгд</td><td>Нэр + ангилалаар хайна, олдохгүй бол empty state</td></tr>
+            <tr><td><code>/cart</code></td><td>Сагс</td><td>Бүгд</td><td>Зочин ч сагсалж чадна (cookie-д cartId)</td></tr>
+            <tr><td><code>/checkout</code></td><td>Төлбөр</td><td>Нэвтэрсэн</td><td>Хаяг, төлбөрийн арга, эцсийн баталгаажуулалт</td></tr>
+            <tr><td><code>/wishlist</code></td><td>Хүслийн жагсаалт</td><td>Нэвтэрсэн</td><td>Сагс руу шилжүүлэх товч</td></tr>
+            <tr><td><code>/account/orders</code></td><td>Миний захиалга</td><td>Нэвтэрсэн</td><td>Зөвхөн <em>өөрийн</em> захиалга — <code>where: { userId }</code></td></tr>
+            <tr><td><code>/login</code> <code>/register</code></td><td>Нэвтрэх</td><td>Зочин</td><td>Zod + React Hook Form</td></tr>
+            <tr><td><code>/admin</code></td><td>Dashboard</td><td>ADMIN</td><td>Статистик, борлуулалтын график, сүүлийн захиалгууд</td></tr>
+            <tr><td><code>/admin/products</code></td><td>Бараа удирдах</td><td>ADMIN</td><td>Хүснэгт, нэмэх/засах/устгах, variant удирдлага</td></tr>
+            <tr><td><code>/admin/orders/[id]</code></td><td>Захиалга удирдах</td><td>ADMIN</td><td>Төлөв солих, төлбөр шалгах</td></tr>
+            <tr><td><code>/admin/categories</code></td><td>Ангилал</td><td>ADMIN</td><td>Нэмэх/засах/устгах</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Хамгаалалт хаана хийгдэх вэ</h3>
+      <p>Хоёр давхар хамгаалалт тавина. <code>middleware.ts</code> нь хурдан шүүлт хийж <code>/admin</code> руу орох гэсэн зочныг <code>/login</code> руу шидэнэ. Гэхдээ <strong>жинхэнэ хамгаалалт</strong> нь Server Action бүрийн эхний мөрөнд байна:</p>
+<pre><code>// actions/admin/product.action.ts
+async function requireAdmin() {
+  const session = await auth();
+  if (session?.user.role !== "ADMIN") {
+    throw new Error("Танд энэ үйлдлийг хийх эрх байхгүй.");
+  }
+  return session;
+}</code></pre>
+      <p>Учир нь middleware-ийг тойрч шууд action дуудах боломжтой. <strong>Сервер талын шалгалтгүй бол хамгаалалт байхгүй</strong> гэсэн үг.</p>
+    </section>
+
+    <section id="s4">
+      <p class="eyebrow">04 — Database ERD</p>
+      <h2>Өгөгдлийн сангийн бүтэц</h2>
+      <p>Neon PostgreSQL + Prisma. Доорх диаграм дээр <code>||--o{</code> тэмдэг нь "нэг нь олонтой холбогдоно" гэсэн үг.</p>
+
+      <div class="plate">
+        <pre class="mermaid">
+%%{init: {"theme":"base","themeVariables":{"background":"#F6F5F1","primaryColor":"#EFEDE7","primaryTextColor":"#161614","primaryBorderColor":"#8E887A","lineColor":"#5B584F","secondaryColor":"#E3DFD4","tertiaryColor":"#F6F5F1","fontFamily":"IBM Plex Mono, monospace","fontSize":"12px"}} }%%
+erDiagram
+  User ||--o{ Order : "захиалга өгнө"
+  User ||--o| Cart : "сагстай"
+  User ||--o| Wishlist : "хүслийн жагсаалттай"
+  User ||--o{ Review : "сэтгэгдэл бичнэ"
+  User ||--o{ Address : "хаягтай"
+
+  Category ||--o{ Product : "агуулна"
+  Category ||--o{ Category : "дэд ангилал"
+
+  Product ||--|{ ProductImage : "зурагтай"
+  Product ||--|{ ProductVariant : "хувилбартай"
+  Product ||--o{ Review : "сэтгэгдэлтэй"
+  Product ||--o{ WishlistItem : "хадгалагдана"
+
+  ProductVariant ||--o{ CartItem : "сагсанд орно"
+  ProductVariant ||--o{ OrderItem : "захиалагдана"
+
+  Cart ||--|{ CartItem : "мөртэй"
+  Wishlist ||--|{ WishlistItem : "мөртэй"
+
+  Order ||--|{ OrderItem : "мөртэй"
+  Order ||--|| Payment : "төлбөртэй"
+  Order }o--o| Coupon : "хөнгөлөлт хэрэглэнэ"
+        </pre>
+      </div>
+      <p class="platecap">Диаграм 01 — Model-уудын холбоос</p>
+
+      <h3>Хамгийн чухал 4 model</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Model</th><th>Гол талбарууд</th><th>Юуны төлөө</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>Product</code></td>
+              <td>id, name, slug, description, basePrice, discountPrice, categoryId, isFeatured, isActive, soldCount, createdAt</td>
+              <td>Барааны <em>ерөнхий</em> мэдээлэл. Үлдэгдэл ЭНД байхгүй.</td>
+            </tr>
+            <tr>
+              <td><code>ProductVariant</code></td>
+              <td>id, productId, size, color, colorHex, sku, stock, price?</td>
+              <td>Өнгө + размер бүрийн <strong>тусдаа үлдэгдэл</strong>. Жинхэнэ зарагдах нэгж.</td>
+            </tr>
+            <tr>
+              <td><code>OrderItem</code></td>
+              <td>id, orderId, variantId, productName, size, color, image, unitPrice, quantity</td>
+              <td>Захиалсан үеийн <strong>үнэ ба нэрийг хуулж хадгална</strong> (snapshot).</td>
+            </tr>
+            <tr>
+              <td><code>Order</code></td>
+              <td>id, orderNumber, userId, status, subtotal, shippingFee, discount, total, address, phone, note</td>
+              <td>Захиалгын толгой. Төлөв энд өөрчлөгдөнө.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Prisma-гаар бичсэн жишээ</h3>
+<pre><code>model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  size      String   // "S" | "M" | "L" | "XL"
+  color     String   // "Black"
+  colorHex  String   // "#111111" — дугуй өнгө харуулахад
+  stock     Int      @default(0)
+  price     Int?     // хоосон бол product.basePrice-ийг ашиглана
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@unique([productId, size, color])   // давхардахгүй
+  @@index([productId])
+}</code></pre>
+      <p><code>@@unique([productId, size, color])</code> нь "Black / M"-ийг хоёр удаа үүсгэхээс сэргийлнэ. Үнийг <code>Int</code>-ээр (төгрөгөөр бүхэл тоо) хадгалж байгаа нь санамсаргүй биш — <code>Float</code> ашиглавал 0.1 + 0.2 = 0.30000000000000004 маягийн алдаа мөнгөн дүнд гарна.</p>
+    </section>
+
+    <section id="s5">
+      <p class="eyebrow">05 — Relationship</p>
+      <h2>Model-ууд яагаад ингэж холбогдож байна вэ</h2>
+
+      <h3>Product ба ProductVariant — 1 : N</h3>
+      <p>"Premium Oversized Hoodie" бол нэг <code>Product</code>. Гэтэл хэрэглэгч үнэндээ "Хар өнгийн, M размерын hoodie"-г худалдаж авдаг. Тийм учраас:</p>
+<pre><code>Product: Premium Oversized Hoodie   (199,000₮)
+  └─ Variant: Black / S  → stock 10
+  └─ Variant: Black / M  → stock 15
+  └─ Variant: Black / L  → stock  8
+  └─ Variant: White / S  → stock  5
+  └─ Variant: White / M  → stock 12</code></pre>
+      <p>Сагс, захиалга бүгд <strong>Product руу биш, Variant руу</strong> холбогдоно. Ингэснээр "Black / M дууссан, White / M байгаа" гэдгийг систем яг таг мэднэ.</p>
+
+      <h3>Order ба OrderItem — үнэ хөлдөх ёстой</h3>
+      <p>Хамгийн олон эхлэгч алддаг газар. Хэрэв <code>OrderItem</code> зөвхөн <code>variantId</code>-г хадгалаад үнийг Product-оос уншдаг бол: маргааш админ үнийг 199,000₮ → 249,000₮ болгоход <strong>өчигдрийн захиалгууд бүгд өөрчлөгдөнө</strong>. Нягтлан бодох бүртгэл сүйрнэ.</p>
+      <p>Тиймээс <code>OrderItem</code> нь захиалга үүсэх мөчид <code>productName</code>, <code>size</code>, <code>color</code>, <code>image</code>, <code>unitPrice</code>-г хуулж авна. Бараа устсан ч хуучин захиалга бүрэн хэвээрээ харагдана.</p>
+
+      <h3>Cart — зочин ба нэвтэрсэн хэрэглэгч</h3>
+      <p><code>Cart</code> нь <code>userId</code> (нэвтэрсэн) эсвэл <code>sessionId</code> (cookie-д хадгалагдсан зочин) хоёрын аль нэгтэй холбогдоно. Хэрэглэгч нэвтрэх үед зочны сагсыг хэрэглэгчийн сагстай нэгтгэнэ — ингэснээр "сагсалсан юм минь алга болчихлоо" гэсэн гомдол гарахгүй.</p>
+
+      <h3>Category — өөртөө холбогдсон</h3>
+      <p><code>Category</code> нь <code>parentId</code> талбартай тул "Эмэгтэй → Даашинз" гэсэн мод үүсгэж чадна. Эхэндээ зөвхөн үндсэн 8 ангилал ашиглаад, дараа нь дэд ангилал нэмэхэд schema өөрчлөх шаардлагагүй.</p>
+
+      <div class="note">
+        <p><b>Устгах үеийн дүрэм</b>Бараа устгахад түүний зураг, variant хамт устана (<code>onDelete: Cascade</code>). Гэхдээ <strong>захиалга хэзээ ч устахгүй</strong> — <code>OrderItem</code> нь variant руу <code>onDelete: SetNull</code>-ээр холбогдоно. Практикт бараа устгахын оронд <code>isActive = false</code> болгох нь илүү аюулгүй.</p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <p class="eyebrow">06 — User flow</p>
+      <h2>Хэрэглэгчийн зам</h2>
+      <div class="plate">
+        <pre class="mermaid">
+%%{init: {"theme":"base","themeVariables":{"background":"#F6F5F1","primaryColor":"#EFEDE7","primaryTextColor":"#161614","primaryBorderColor":"#8E887A","lineColor":"#5B584F","secondaryColor":"#E3DFD4","tertiaryColor":"#F6F5F1","fontFamily":"IBM Plex Mono, monospace","fontSize":"12px"}} }%%
+flowchart TD
+  A[Нүүр хуудас] --> B{Бараа хэрхэн олох}
+  B -->|Ангилал| C[Дэлгүүр + Filter]
+  B -->|Хайлт| D[Хайлтын үр дүн]
+  B -->|New / Sale| C
+  C --> E[Барааны дэлгэрэнгүй]
+  D --> E
+  E --> F[Өнгө сонгох]
+  F --> G[Размер сонгох]
+  G --> H{Үлдэгдэл байна уу}
+  H -->|Үгүй| I[Дууссан - товч идэвхгүй]
+  H -->|Тийм| J[Тоо ширхэг + Сагсанд хийх]
+  J --> K[Toast: Сагсанд нэмэгдлээ]
+  K --> L[Сагс]
+  L --> M{Нэвтэрсэн үү}
+  M -->|Үгүй| N[Нэвтрэх / Бүртгүүлэх]
+  N --> O[Checkout]
+  M -->|Тийм| O
+  O --> P[Хаяг + утас + төлбөрийн арга]
+  P --> Q[Захиалга баталгаажуулах]
+  Q --> R[Үлдэгдэл шалгаж хасах]
+  R --> S[Захиалга үүслээ]
+  S --> T[Миний захиалга - төлөв хянах]
+        </pre>
+      </div>
+      <p class="platecap">Диаграм 02 — Хэрэглэгчийн үндсэн урсгал</p>
+
+      <p>Анхаарах гурван зүйл:</p>
+      <ul>
+        <li><strong>Сагсалахад нэвтрэх шаардлагагүй.</strong> Зочин чөлөөтэй сагсална, зөвхөн checkout дээр нэвтэрнэ. Ингэснээр борлуулалт унахгүй.</li>
+        <li><strong>Размер сонгоогүй бол "Сагсанд хийх" товч идэвхгүй.</strong> Сонголт хийсний дараа тухайн variant-ын үлдэгдлийг харуулна: "Үлдэгдэл: 3".</li>
+        <li><strong>Үлдэгдлийг хоёр удаа шалгана</strong> — сагсанд нэмэхэд нэг удаа, захиалга үүсгэхэд дахин нэг удаа. Хоёр хүн зэрэг сүүлийн барааг авах гэж болзошгүй.</li>
+      </ul>
+    </section>
+
+    <section id="s7">
+      <p class="eyebrow">07 — Stock</p>
+      <h2>Үлдэгдлийн систем</h2>
+      <p>Энэ бол e-commerce-ийн зүрх. Буруу хийвэл байхгүй бараа зарагдана. Бүх ажиллагаа <strong>нэг transaction</strong> дотор явагдана — эсвэл бүгд амжилттай, эсвэл юу ч болохгүй.</p>
+<pre><code>// actions/order.action.ts — гол хэсэг
+await prisma.$transaction(async (tx) =&gt; {
+
+  for (const item of cartItems) {
+    // Нөхцөлтэй хасалт: stock хүрэлцэж байвал л хасна
+    const result = await tx.productVariant.updateMany({
+      where: { id: item.variantId, stock: { gte: item.quantity } },
+      data:  { stock: { decrement: item.quantity } },
+    });
+
+    if (result.count === 0) {
+      throw new Error(`${item.name} (${item.color}/${item.size}) үлдэгдэл хүрэлцэхгүй байна.`);
+    }
+  }
+
+  const order = await tx.order.create({ data: { /* items snapshot-той */ } });
+  await tx.cartItem.deleteMany({ where: { cartId } });
+  return order;
+});</code></pre>
+
+      <p><code>updateMany</code>-г <code>where: { stock: { gte: quantity } }</code>-тэй хослуулсан нь санамсаргүй биш. Энэ бол <strong>атомик</strong> үйлдэл: database өөрөө нэг алхамд шалгаж хасна. Хэрэв эхлээд <code>findUnique</code>-ээр уншаад дараа нь <code>update</code> хийвэл, тэр хоёрын хооронд өөр хэрэглэгч мөн адил барааг авч, үлдэгдэл <strong>сөрөг</strong> болно.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Нөхцөл</th><th>Үлдэгдэлд юу болох</th><th>Хэрэглэгч юу харах</th></tr></thead>
+          <tbody>
+            <tr><td>Захиалга үүсэх</td><td><code>stock -= quantity</code></td><td>Захиалга амжилттай</td></tr>
+            <tr><td>Захиалга цуцлагдах</td><td><code>stock += quantity</code> (буцаана)</td><td>Цуцлагдсан</td></tr>
+            <tr><td>Үлдэгдэл 0</td><td>Өөрчлөгдөхгүй</td><td>"Дууссан" — товч идэвхгүй</td></tr>
+            <tr><td>Үлдэгдэл 1–5</td><td>Өөрчлөгдөхгүй</td><td>"Зөвхөн 3 ширхэг үлдсэн"</td></tr>
+            <tr><td>Бүх variant 0</td><td>Өөрчлөгдөхгүй</td><td>Карт дээр "SOLD OUT" тэмдэг</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Цуцлах үед давхар буцаахаас сэргийлж <code>Order.stockRestored</code> гэсэн <code>Boolean</code> талбар нэмнэ. Нэг захиалгын үлдэгдлийг зөвхөн нэг удаа буцаана.</p>
+    </section>
+
+    <section id="s8">
+      <p class="eyebrow">08 — Order</p>
+      <h2>Захиалгын төлөв</h2>
+      <div class="plate">
+        <pre class="mermaid">
+%%{init: {"theme":"base","themeVariables":{"background":"#F6F5F1","primaryColor":"#EFEDE7","primaryTextColor":"#161614","primaryBorderColor":"#8E887A","lineColor":"#5B584F","secondaryColor":"#E3DFD4","tertiaryColor":"#F6F5F1","fontFamily":"IBM Plex Mono, monospace","fontSize":"12px"}} }%%
+stateDiagram-v2
+  [*] --> PENDING: Захиалга үүслээ
+  PENDING --> CONFIRMED: Төлбөр баталгаажсан
+  CONFIRMED --> PROCESSING: Бэлтгэж байна
+  PROCESSING --> SHIPPED: Хүргэлтэнд гарсан
+  SHIPPED --> DELIVERED: Хүргэгдсэн
+  DELIVERED --> [*]
+  PENDING --> CANCELLED: Цуцлах
+  CONFIRMED --> CANCELLED: Цуцлах
+  PROCESSING --> CANCELLED: Цуцлах
+  CANCELLED --> [*]
+        </pre>
+      </div>
+      <p class="platecap">Диаграм 03 — Төлөвийн шилжилт. Хүргэлтэнд гарсны дараа цуцлах боломжгүй.</p>
+
+      <p>Төлөв бүр яг ямар үед солигдохыг код дотор дүрэмчилнэ — админ санамсаргүй "Хүргэгдсэн"-ээс "Хүлээгдэж байна" руу буцаах ёсгүй:</p>
+<pre><code>// lib/constants.ts
+export const ORDER_FLOW = {
+  PENDING:    ["CONFIRMED", "CANCELLED"],
+  CONFIRMED:  ["PROCESSING", "CANCELLED"],
+  PROCESSING: ["SHIPPED", "CANCELLED"],
+  SHIPPED:    ["DELIVERED"],
+  DELIVERED:  [],
+  CANCELLED:  [],
+} as const;</code></pre>
+      <p>Админы төлөв солих dropdown нь энэ объектоос л сонголтоо авна. Server action мөн адил шалгана.</p>
+
+      <h3>Төлбөрийн арга</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Арга</th><th>Захиалга үүсэх үеийн төлөв</th><th>Хэзээ CONFIRMED болох</th></tr></thead>
+          <tbody>
+            <tr><td>Хүргэлтээр төлөх (COD)</td><td>PENDING</td><td>Админ гараар баталгаажуулна</td></tr>
+            <tr><td>Банкны шилжүүлэг</td><td>PENDING</td><td>Админ гүйлгээ шалгаад баталгаажуулна</td></tr>
+            <tr><td>QPay</td><td>PENDING</td><td>Банкны webhook автоматаар <code>/api/webhooks/qpay</code> руу мэдэгдэнэ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Эхний хувилбарт QPay-г хамгийн сүүлд (PHASE 13) хийнэ. Эхлээд COD болон банкны шилжүүлгээр бүтэн ажиллах систем гаргаж авах нь зөв — учир нь төлбөрийн интеграц бол хамгийн олон саатал үүсгэдэг хэсэг.</p>
+    </section>
+
+    <section id="s9">
+      <p class="eyebrow">09 — Admin flow</p>
+      <h2>Админы зам</h2>
+      <div class="plate">
+        <pre class="mermaid">
+%%{init: {"theme":"base","themeVariables":{"background":"#F6F5F1","primaryColor":"#EFEDE7","primaryTextColor":"#161614","primaryBorderColor":"#8E887A","lineColor":"#5B584F","secondaryColor":"#E3DFD4","tertiaryColor":"#F6F5F1","fontFamily":"IBM Plex Mono, monospace","fontSize":"12px"}} }%%
+flowchart TD
+  A[Нэвтрэх] --> B{role === ADMIN}
+  B -->|Үгүй| C[Нүүр рүү буцаана]
+  B -->|Тийм| D[Dashboard]
+  D --> E[Бараа удирдах]
+  D --> F[Захиалга удирдах]
+  D --> G[Ангилал удирдах]
+  D --> H[Хэрэглэгч харах]
+
+  E --> E1[Шинэ бараа нэмэх]
+  E1 --> E2[Мэдээлэл + Cloudinary зураг]
+  E2 --> E3[Variant үүсгэх: өнгө x размер x үлдэгдэл]
+  E3 --> E4[Хадгалах - Zod шалгана]
+
+  F --> F1[Захиалгын жагсаалт]
+  F1 --> F2[Дэлгэрэнгүй харах]
+  F2 --> F3[Төлбөр баталгаажуулах]
+  F3 --> F4[Төлөв солих]
+  F4 --> F5[Цуцлавал үлдэгдэл буцаана]
+        </pre>
+      </div>
+      <p class="platecap">Диаграм 04 — Админы үндсэн урсгал</p>
+
+      <h3>Dashboard дээр гарах тоонууд</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Үзүүлэлт</th><th>Хэрхэн тооцох</th></tr></thead>
+          <tbody>
+            <tr><td>Нийт борлуулалт</td><td><code>sum(total)</code> — цуцлагдаагүй захиалгууд</td></tr>
+            <tr><td>Өнөөдрийн борлуулалт</td><td>Мөн адил, <code>createdAt ≥ өнөөдөр 00:00</code></td></tr>
+            <tr><td>Нийт захиалга</td><td><code>count(Order)</code></td></tr>
+            <tr><td>Дуусах дөхсөн бараа</td><td><code>ProductVariant where stock &lt;= 5</code></td></tr>
+            <tr><td>Борлуулалтын график</td><td>Өдөр / 7 хоног / сараар бүлэглэсэн нийлбэр</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Эдгээр бүх тоог <code>lib/queries/stats.query.ts</code> дотор нэг газар бичнэ. Dashboard component нь зөвхөн дуудаж харуулна.</p>
+    </section>
+
+    <section id="s10">
+      <p class="eyebrow">10 — Design system</p>
+      <h2>Дизайны хэл</h2>
+      <p>Лавлагаа дизайнаас (SABLE) авсан зарчим: <strong>дулаан цагаан дэвсгэр, хар бэх, өргөн зайтай том үсэг, үсэрхэг зураас, дугуйруулаагүй ирмэг</strong>. Өнгө бараг байхгүй — зураг л өнгө өгнө. Энэ бүхнийг <code>globals.css</code> дотор token болгож нэг удаа тодорхойлно.</p>
+
+      <div class="swatches">
+        <div class="sw"><i style="background:#F2F1ED"></i><b>bone</b><span>#F2F1ED<br>дэвсгэр</span></div>
+        <div class="sw"><i style="background:#111110"></i><b>ink</b><span>#111110<br>текст, товч</span></div>
+        <div class="sw"><i style="background:#6B6862"></i><b>graphite</b><span>#6B6862<br>хоёрдогч текст</span></div>
+        <div class="sw"><i style="background:#E4E0D6"></i><b>sand</b><span>#E4E0D6<br>гадаргуу</span></div>
+        <div class="sw"><i style="background:#DEDBD3"></i><b>line</b><span>#DEDBD3<br>зураас</span></div>
+        <div class="sw"><i style="background:#9E2B1E"></i><b>sale</b><span>#9E2B1E<br>зөвхөн хямдрал</span></div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Элемент</th><th>Дүрэм</th></tr></thead>
+          <tbody>
+            <tr><td>Display font</td><td><strong>Jost</strong> — том гарчиг, лого, товчны текст. Бүгд ТОМ ҮСГЭЭР, <code>letter-spacing: .18em</code></td></tr>
+            <tr><td>Body font</td><td><strong>Inter</strong> — тайлбар, үнэ, форм. Энгийн, уншихад амар</td></tr>
+            <tr><td>Товч</td><td>Дугуйруулалт <code>0</code>. Хар дэвсгэр, цагаан текст. Hover дээр 85% тунгалаг</td></tr>
+            <tr><td>Барааны зураг</td><td>Харьцаа <code>3:4</code>. Hover үед 2 дахь зураг руу 400ms-д гүйлгэн солигдоно</td></tr>
+            <tr><td>Grid</td><td>Desktop 4 / Tablet 3 / Mobile 2 багана</td></tr>
+            <tr><td>Хөдөлгөөн</td><td>Зөвхөн <code>opacity</code> ба <code>transform</code>. 200–400ms. Өөр юу ч биш</td></tr>
+            <tr><td>Ачаалалт</td><td>Skeleton — бодит картын хэлбэртэй саарал хайрцаг</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <p><b>Нэг зөвлөгөө</b>Дугуйруулалтыг тэглэх нь энэ төрлийн дизайнд хамгийн их нөлөөтэй ганц шийдэл. <code>rounded-lg</code> нэмэх бүрд дэлгүүр premium бус, SaaS dashboard шиг харагдаж эхэлнэ.</p>
+      </div>
+    </section>
+
+    <section id="s11">
+      <p class="eyebrow">11 — Roadmap</p>
+      <h2>16 үе шат</h2>
+      <p>Дараалал санамсаргүй биш: доод давхарга нь дээд давхаргаа тэжээнэ. Database байхгүй бол хуудас юу ч харуулах юмгүй; нэвтрэлт байхгүй бол сагс хэнийх нь болох нь тодорхойгүй.</p>
+      <ol class="phases">
+        <li class="now"><b>01</b><span class="t">Project setup — багц, folder, design token</span><em>Одоо</em></li>
+        <li><b>02</b><span class="t">Neon database + Prisma холболт</span><em>Дараа</em></li>
+        <li><b>03</b><span class="t">Schema — бүх model, seed өгөгдөл</span><em></em></li>
+        <li><b>04</b><span class="t">Auth.js — бүртгэл, нэвтрэлт, role</span><em></em></li>
+        <li><b>05</b><span class="t">Navbar, Footer, Нүүр хуудас</span><em></em></li>
+        <li><b>06</b><span class="t">Shop, ангилал, хайлт, filter</span><em></em></li>
+        <li><b>07</b><span class="t">Барааны дэлгэрэнгүй + variant сонголт</span><em></em></li>
+        <li><b>08</b><span class="t">Сагс</span><em></em></li>
+        <li><b>09</b><span class="t">Checkout + захиалга + үлдэгдэл</span><em></em></li>
+        <li><b>10</b><span class="t">Админ dashboard</span><em></em></li>
+        <li><b>11</b><span class="t">Бараа удирдах</span><em></em></li>
+        <li><b>12</b><span class="t">Захиалга удирдах</span><em></em></li>
+        <li><b>13</b><span class="t">QPay төлбөр</span><em></em></li>
+        <li><b>14</b><span class="t">Wishlist, review, coupon</span><em></em></li>
+        <li><b>15</b><span class="t">Responsive, loading, error</span><em></em></li>
+        <li><b>16</b><span class="t">Оптимизаци + Vercel deploy</span><em></em></li>
+      </ol>
+      <p>Үе шат бүрийн төгсгөлд <strong>ажиллаж байгаа зүйл</strong> гарна — тал дутуу код үлдээхгүй. PHASE 5 дуусахад дэлгүүр чинь бодит харагдана, PHASE 9 дуусахад бодит захиалга авч чадна.</p>
+    </section>
+
+    <footer class="end">Hannah Style · Техникийн төлөвлөгөө · Хувилбар 01</footer>
+    </main>
+  </div>
+</div>
