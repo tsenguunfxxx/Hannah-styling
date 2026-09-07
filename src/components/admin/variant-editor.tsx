@@ -7,12 +7,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { compareSizes } from "@/lib/variant-utils";
+import { KIDS_SIZES, LETTER_SIZES } from "@/lib/constants";
 import type { ProductVariantInput } from "@/schemas/product.schema";
 
 /** Түргэн үүсгэхэд санал болгох размерууд */
 const SIZE_PRESETS = [
+  // Хүүхдийн хувцас — өндрөөр (см). Дэлгүүрийн үндсэн ангилал тул эхэнд.
+  { label: "Хүүхэд (см)", sizes: [...KIDS_SIZES] },
+  { label: "Хүүхэд (бага нас)", sizes: ["90", "100", "110", "120"] },
+  { label: "Хүүхэд (том нас)", sizes: ["130", "140", "150", "160"] },
   { label: "Хувцас", sizes: ["S", "M", "L", "XL"] },
-  { label: "Хувцас (XS-XXL)", sizes: ["XS", "S", "M", "L", "XL", "XXL"] },
+  { label: "Хувцас (XS-XXL)", sizes: [...LETTER_SIZES] },
   { label: "Гутал", sizes: ["39", "40", "41", "42", "43"] },
   { label: "Ганц хэмжээ", sizes: ["ONE"] },
 ];
