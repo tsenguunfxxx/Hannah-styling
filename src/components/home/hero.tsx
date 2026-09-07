@@ -55,7 +55,7 @@ export function Hero() {
       <div className="relative flex min-h-[88svh] flex-col justify-end px-5 pb-16 sm:px-10 lg:min-h-0 lg:justify-center lg:px-14 lg:py-20 xl:px-20">
         <p className="label text-bone/70 lg:text-graphite">elegant babies</p>
 
-        <h1 className="mt-5 font-display text-4xl leading-[1.1] font-medium uppercase tracking-label text-bone sm:text-5xl lg:text-ink xl:text-6xl">
+        <h1 className="mt-5 font-display text-3xl leading-[1.15] font-medium uppercase tracking-label text-bone sm:text-5xl lg:text-ink xl:text-6xl">
           Зөвхөн хамгийн сайн
           <br />
           хамгийн хөөрхөн нь тэдэнд.
