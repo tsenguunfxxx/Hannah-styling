@@ -50,7 +50,7 @@ export function CheckoutForm({
       district: "Баянгол",
       addressLine: "",
       note: "",
-      paymentMethod: "QPAY",
+      paymentMethod: "WIRE",
       ...defaultValues,
     },
   });

@@ -3,11 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CircleCheck, Truck } from "lucide-react";
 
 import { getOrderByNumber } from "@/lib/queries/order.query";
-import { isQpayConfigured } from "@/lib/qpay";
 import { isWireConfigured, isWireTestMode } from "@/lib/wire";
 import { formatPrice } from "@/lib/utils";
 
-import { QpayPanel } from "@/components/payment/qpay-panel";
 import { WirePanel } from "@/components/payment/wire-panel";
 import { BankTransferPanel } from "@/components/payment/bank-transfer-panel";
 import { TestPaymentPanel } from "@/components/payment/test-payment-panel";
@@ -141,12 +139,24 @@ function PaymentBody({
     );
   }
 
-  // QPAY — түлхүүр тохируулаагүй бол туршилтын самбар
-  return isQpayConfigured() ? (
-    <QpayPanel orderNumber={orderNumber} amount={amount} />
-  ) : (
-    <TestPaymentPanel orderNumber={orderNumber} />
-  );
+  /*
+    QPAY-г 2026 оны 9-р сард хассан. Гэвч тэр аргаар үүссэн ХУУЧИН
+    захиалгууд өгөгдлийн санд үлдсэн тул энд зөөлөн хариу өгнө.
+    Үгүй бол тэр захиалгуудын хуудас хоосон харагдана.
+  */
+  if (method === "QPAY") {
+    return (
+      <Notice
+        title="Энэ арга ашиглагдахаа больсон"
+        description={`QPay-ээр төлөх боломжгүй боллоо. ${formatPrice(amount)}-ийн төлбөрөө шилжүүлгээр хийхийг хүсвэл бидэнтэй холбогдоно уу.`}
+        href="/contact"
+        linkLabel="Холбоо барих"
+      />
+    );
+  }
+
+  // Тохируулаагүй gateway — зөвхөн хөгжүүлэлтэд туршилтын самбар
+  return <TestPaymentPanel orderNumber={orderNumber} />;
 }
 
 function Notice({

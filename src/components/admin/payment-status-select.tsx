@@ -12,7 +12,7 @@ import { updatePaymentStatusAction } from "@/actions/admin/order.action";
  * Төлбөрийн төлөв тэмдэглэх.
  *
  * Банкны шилжүүлэг ирсэн эсэхийг админ өөрөө шалгаад тэмдэглэнэ.
- * QPay-ийн автомат баталгаажуулалт PHASE 13-д нэмэгдэнэ.
+ * wire.mn-ээр төлсөн захиалга webhook-оор автоматаар баталгаажна.
  */
 export function PaymentStatusSelect({
   orderNumber,

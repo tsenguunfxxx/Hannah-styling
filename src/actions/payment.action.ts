@@ -5,15 +5,10 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import {
-  checkQpayPayment,
-  createQpayInvoice,
-  isQpayConfigured,
-  type QpayBankUrl,
-} from "@/lib/qpay";
-import {
   createWireCheckoutSession,
   createWireIntent,
   isWireConfigured,
+  retrieveWireIntent,
 } from "@/lib/wire";
 import { bankTransferSchema } from "@/schemas/payment.schema";
 import type { ActionResult } from "@/types";
@@ -59,7 +54,7 @@ async function findOwnedOrder(orderNumber: string) {
           method: true,
           status: true,
           amount: true,
-          qpayInvoiceId: true,
+          wireIntentId: true,
         },
       },
     },
@@ -88,122 +83,6 @@ async function markPaid(paymentId: string, transactionId: string | null) {
   });
 }
 
-// ------------------------------------------------------------
-// QPAY — НЭХЭМЖЛЭХ ҮҮСГЭХ
-// ------------------------------------------------------------
-export type QpayInvoiceResult = {
-  qrImage: string;
-  qrText: string;
-  bankUrls: QpayBankUrl[];
-};
-
-export async function startQpayPaymentAction(
-  orderNumber: string,
-): Promise<ActionResult<QpayInvoiceResult>> {
-  const order = await findOwnedOrder(orderNumber);
-  if (!order?.payment) return { success: false, error: "Захиалга олдсонгүй." };
-
-  if (order.payment.status === "PAID") {
-    return { success: false, error: "Энэ захиалга аль хэдийн төлөгдсөн." };
-  }
-
-  if (order.status === "CANCELLED") {
-    return { success: false, error: "Цуцлагдсан захиалгын төлбөр төлөх боломжгүй." };
-  }
-
-  if (!isQpayConfigured()) {
-    return {
-      success: false,
-      error:
-        "QPay тохируулаагүй байна. .env файлд мерчантын түлхүүрээ нэмнэ үү.",
-    };
-  }
-
-  try {
-    const appUrl = getAppUrl();
-
-    const invoice = await createQpayInvoice({
-      senderInvoiceNo: order.orderNumber,
-      receiverCode: order.phone,
-      description: `HANNAH захиалга ${order.orderNumber}`,
-      amount: order.payment.amount,
-      // QPay төлбөр орсныг ЭНЭ хаягаар мэдэгдэнэ
-      callbackUrl: `${appUrl}/api/payment/qpay/callback?order=${order.orderNumber}`,
-    });
-
-    // invoice_id-г хадгална — дараа нь шалгахад хэрэгтэй
-    await prisma.payment.update({
-      where: { id: order.payment.id },
-      data: { qpayInvoiceId: invoice.invoiceId },
-    });
-
-    return {
-      success: true,
-      data: {
-        qrImage: invoice.qrImage,
-        qrText: invoice.qrText,
-        bankUrls: invoice.bankUrls,
-      },
-    };
-  } catch (error) {
-    console.error("QPay нэхэмжлэх:", error);
-    return {
-      success: false,
-      error: "QPay-тэй холбогдож чадсангүй. Түр хүлээгээд дахин оролдоно уу.",
-    };
-  }
-}
-
-// ------------------------------------------------------------
-// ТӨЛБӨР ШАЛГАХ
-// ------------------------------------------------------------
-/**
- * Төлөгдсөн эсэхийг QPay-гээс асууна.
- *
- * Callback ирээгүй байж болно (сүлжээ тасарсан, сервер унтарсан).
- * Тиймээс хэрэглэгч "Шалгах" товч дарж өөрөө шаардаж чадна.
- */
-export async function checkPaymentStatusAction(
-  orderNumber: string,
-): Promise<ActionResult<{ paid: boolean }>> {
-  const order = await findOwnedOrder(orderNumber);
-  if (!order?.payment) return { success: false, error: "Захиалга олдсонгүй." };
-
-  if (order.payment.status === "PAID") {
-    return { success: true, data: { paid: true } };
-  }
-
-  if (!order.payment.qpayInvoiceId) {
-    return { success: false, error: "Нэхэмжлэх үүсгээгүй байна." };
-  }
-
-  try {
-    const result = await checkQpayPayment(order.payment.qpayInvoiceId);
-
-    if (!result.paid) {
-      return { success: true, data: { paid: false } };
-    }
-
-    await markPaid(order.payment.id, result.transactionId);
-    revalidateOrder(orderNumber);
-
-    return { success: true, data: { paid: true } };
-  } catch (error) {
-    console.error("QPay шалгалт:", error);
-    return { success: false, error: "Төлбөрийг шалгаж чадсангүй." };
-  }
-}
-
-// ------------------------------------------------------------
-// БАНКНЫ ШИЛЖҮҮЛЭГ
-// ------------------------------------------------------------
-/**
- * Хэрэглэгч гүйлгээний дугаараа мэдэгдэнэ.
- *
- * Төлөв нь "Төлөгдөөгүй" ХЭВЭЭР үлдэнэ — банкны шилжүүлгийг
- * зөвхөн админ дансаа хараад баталгаажуулна. Хэрэглэгчийн үг
- * дээр тулгуурлан төлөгдсөн гэж тэмдэглэвэл луйврын үүд нээгдэнэ.
- */
 // ------------------------------------------------------------
 // WIRE.MN
 // ------------------------------------------------------------
@@ -271,6 +150,45 @@ export async function startWirePaymentAction(
   }
 }
 
+/**
+ * Төлбөр төлөгдсөн эсэхийг wire.mn-ээс шалгана.
+ *
+ * Webhook бол үндсэн зам. Гэвч сүлжээ тасрах, endpoint түр
+ * унтрах зэргээр мэдэгдэл ирэхгүй байж болно. Тиймээс хэрэглэгч
+ * өөрөө шалгах боломжтой байх ёстой — үгүй бол төлчихөөд
+ * "төлөгдөөгүй" гэсэн захиалгатай үлдэнэ.
+ */
+export async function checkWirePaymentAction(
+  orderNumber: string,
+): Promise<ActionResult<{ paid: boolean }>> {
+  const order = await findOwnedOrder(orderNumber);
+  if (!order?.payment) return { success: false, error: "Захиалга олдсонгүй." };
+
+  if (order.payment.status === "PAID") {
+    return { success: true, data: { paid: true } };
+  }
+
+  if (!order.payment.wireIntentId) {
+    return { success: false, error: "Төлбөр эхлүүлээгүй байна." };
+  }
+
+  try {
+    const intent = await retrieveWireIntent(order.payment.wireIntentId);
+
+    if (intent.status !== "succeeded") {
+      return { success: true, data: { paid: false } };
+    }
+
+    await markPaid(order.payment.id, order.payment.wireIntentId);
+    revalidateOrder(orderNumber);
+
+    return { success: true, data: { paid: true } };
+  } catch (error) {
+    console.error("wire.mn шалгалт:", error);
+    return { success: false, error: "Төлбөрийг шалгаж чадсангүй." };
+  }
+}
+
 export async function submitBankTransferAction(
   orderNumber: string,
   input: unknown,
@@ -305,11 +223,11 @@ export async function submitBankTransferAction(
 // ТУРШИЛТЫН ГОРИМ
 // ------------------------------------------------------------
 /**
- * QPay-гүйгээр төлбөрийн урсгалыг турших.
+ * Төлбөрийн gateway-гүйгээр урсгалыг турших.
  *
  * ХОЁР хамгаалалт:
  *   1. Production-д ОГТ ажиллахгүй
- *   2. QPay тохируулсан бол ажиллахгүй
+ *   2. wire.mn тохируулсан бол ажиллахгүй
  *
  * Ингэснээр бодит дэлгүүр дээр энэ товчоор төлбөр "төлөгдөх" аргагүй.
  */
@@ -320,10 +238,10 @@ export async function simulatePaymentAction(
     return { success: false, error: "Энэ үйлдэл боломжгүй." };
   }
 
-  if (isQpayConfigured()) {
+  if (isWireConfigured()) {
     return {
       success: false,
-      error: "QPay тохируулагдсан тул туршилтын горим унтраалттай.",
+      error: "wire.mn тохируулагдсан тул туршилтын горим унтраалттай.",
     };
   }
 

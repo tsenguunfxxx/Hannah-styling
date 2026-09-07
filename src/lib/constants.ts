@@ -66,8 +66,12 @@ export const ORDER_STATUS = {
 export type OrderStatusKey = keyof typeof ORDER_STATUS;
 
 /** Төлбөрийн аргууд */
+/*
+  QPay-г хассан (2026-09). Хуучин захиалгууд өгөгдлийн санд үлдсэн тул
+  Prisma-гийн `PaymentMethod` enum дотор QPAY хэвээр байгаа — гэхдээ
+  энд байхгүй тул ШИНЭ захиалгад сонгогдох боломжгүй.
+*/
 export const PAYMENT_METHODS = [
-  { value: "QPAY", label: "QPay", hint: "QR кодоор шууд төлөх" },
   {
     value: "WIRE",
     label: "Wire",

@@ -128,7 +128,7 @@ const PAYMENT_STATUSES: PaymentStatus[] = [
  * ТӨЛБӨРИЙН ТӨЛӨВ ТЭМДЭГЛЭХ.
  *
  * Банкны шилжүүлэг ирсэн эсэхийг админ гараар шалгаж тэмдэглэнэ.
- * QPay-ийн автомат баталгаажуулалт PHASE 13-д нэмэгдэнэ.
+ * wire.mn-ээр төлсөн захиалга webhook-оор автоматаар баталгаажна.
  */
 export async function updatePaymentStatusAction(
   orderNumber: string,

@@ -11,7 +11,7 @@ import { simulatePaymentAction } from "@/actions/payment.action";
 /**
  * ТУРШИЛТЫН САМБАР.
  *
- * QPay-ийн мерчант түлхүүр тохируулаагүй үед л харагдана.
+ * Төлбөрийн gateway тохируулаагүй үед л харагдана.
  * Server Action нь production-д БҮРЭН унтардаг тул энэ товч
  * бодит дэлгүүр дээр ажиллах боломжгүй.
  */
@@ -41,7 +41,7 @@ export function TestPaymentPanel({ orderNumber }: { orderNumber: string }) {
       </p>
 
       <p className="mt-3 text-sm leading-relaxed text-graphite">
-        QPay-ийн мерчант түлхүүр тохируулаагүй байна. Төлбөрийн урсгалыг
+        Төлбөрийн түлхүүр тохируулаагүй байна. Төлбөрийн урсгалыг
         шалгахын тулд доорх товчоор төлбөр орсон гэж дүрсэлж болно.
       </p>
 
@@ -56,7 +56,7 @@ export function TestPaymentPanel({ orderNumber }: { orderNumber: string }) {
       </Button>
 
       <p className="mt-3 text-xs text-graphite">
-        .env файлд QPAY_USERNAME, QPAY_PASSWORD, QPAY_INVOICE_CODE нэмэхэд
+        .env файлд WIRE_SECRET_KEY нэмэхэд
         энэ хэсэг алга болж, жинхэнэ QR код гарна.
       </p>
     </div>

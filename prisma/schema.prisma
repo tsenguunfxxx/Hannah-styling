@@ -32,6 +32,9 @@ enum OrderStatus {
 }
 
 enum PaymentMethod {
+  /// ХУУЧИРСАН — 2026-09-д хассан. Шинэ захиалгад сонгогдохгүй
+  /// (lib/constants.ts дотор байхгүй). Хуучин захиалгууд ашигласаар
+  /// байгаа тул enum-аас БҮРМӨСӨН хасч болохгүй.
   QPAY
   WIRE // wire.mn — банкны апп, хэтэвч, QR-ыг нэг дор
   BANK_TRANSFER
@@ -405,7 +408,9 @@ model Payment {
   amount Int
 
   transactionId String? // Банкны гүйлгээний дугаар
-  qpayInvoiceId String? // QPay нэхэмжлэхийн ID
+  /// ХУУЧИРСАН — QPay хассан. Бүх мөрөнд хоосон байгаа тул
+  /// дараагийн deploy-ийн дараа устгаж болно.
+  qpayInvoiceId String?
 
   /// wire.mn-ий PaymentIntent (pi_...). Төлбөр төлөгдсөн эсэхийг
   /// дараа нь ЭНЭ дугаараар шалгана.
