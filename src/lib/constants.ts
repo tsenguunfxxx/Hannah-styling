@@ -69,6 +69,11 @@ export type OrderStatusKey = keyof typeof ORDER_STATUS;
 export const PAYMENT_METHODS = [
   { value: "QPAY", label: "QPay", hint: "QR кодоор шууд төлөх" },
   {
+    value: "WIRE",
+    label: "Wire",
+    hint: "Банкны апп, хэтэвч, QR — нэг дор",
+  },
+  {
     value: "BANK_TRANSFER",
     label: "Банкны шилжүүлэг",
     hint: "Дансаар шилжүүлэх",

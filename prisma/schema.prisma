@@ -33,6 +33,7 @@ enum OrderStatus {
 
 enum PaymentMethod {
   QPAY
+  WIRE // wire.mn — банкны апп, хэтэвч, QR-ыг нэг дор
   BANK_TRANSFER
   COD // Хүргэлтээр төлөх
 }
@@ -405,7 +406,12 @@ model Payment {
 
   transactionId String? // Банкны гүйлгээний дугаар
   qpayInvoiceId String? // QPay нэхэмжлэхийн ID
-  paidAt        DateTime?
+
+  /// wire.mn-ий PaymentIntent (pi_...). Төлбөр төлөгдсөн эсэхийг
+  /// дараа нь ЭНЭ дугаараар шалгана.
+  wireIntentId String?
+
+  paidAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

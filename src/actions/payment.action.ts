@@ -10,6 +10,11 @@ import {
   isQpayConfigured,
   type QpayBankUrl,
 } from "@/lib/qpay";
+import {
+  createWireCheckoutSession,
+  createWireIntent,
+  isWireConfigured,
+} from "@/lib/wire";
 import { bankTransferSchema } from "@/schemas/payment.schema";
 import type { ActionResult } from "@/types";
 
@@ -19,6 +24,20 @@ import type { ActionResult } from "@/types";
  * АЮУЛГҮЙ БАЙДАЛ: захиалга бүрд эзэмшлийг шалгана. Дугаарыг
  * таамаглаад өөр хүний төлбөртэй тоглох боломжгүй.
  */
+
+/**
+ * Сайтын үндсэн хаяг.
+ *
+ * Төгсгөлийн "/"-г хасна. Vercel дээр хаягаа хуулж тавихад ихэвчлэн
+ * "https://site.vercel.app/" гэж ордог — тэгвэл холбоос "...app//api/..."
+ * болж хоёр ташуу зураастай болно.
+ */
+function getAppUrl(): string {
+  return (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3100").replace(
+    /\/+$/,
+    "",
+  );
+}
 
 /** Захиалгыг олоод, энэ хүнийх мөн эсэхийг шалгана */
 async function findOwnedOrder(orderNumber: string) {
@@ -101,14 +120,7 @@ export async function startQpayPaymentAction(
   }
 
   try {
-    /*
-      Төгсгөлийн "/"-г хасна. Vercel дээр хаягаа хуулж тавихад ихэвчлэн
-      "https://site.vercel.app/" гэж ордог — тэгвэл доорх холбоос
-      "...app//api/..." болж хоёр ташуу зураастай болно.
-    */
-    const appUrl = (
-      process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3100"
-    ).replace(/\/+$/, "");
+    const appUrl = getAppUrl();
 
     const invoice = await createQpayInvoice({
       senderInvoiceNo: order.orderNumber,
@@ -192,6 +204,73 @@ export async function checkPaymentStatusAction(
  * зөвхөн админ дансаа хараад баталгаажуулна. Хэрэглэгчийн үг
  * дээр тулгуурлан төлөгдсөн гэж тэмдэглэвэл луйврын үүд нээгдэнэ.
  */
+// ------------------------------------------------------------
+// WIRE.MN
+// ------------------------------------------------------------
+/**
+ * wire.mn-ий төлөх хуудас руу явуулах холбоос үүсгэнэ.
+ *
+ * Hosted checkout ашиглаж байгаа тул QR, банкны сонголтыг бид
+ * зурахгүй — wire.mn-ий хуудас өөрөө харуулна. Хэрэглэгч төлөөд
+ * буцаж ирнэ, харин ЖИНХЭНЭ баталгаажуулалт нь webhook-оор ирнэ.
+ */
+export async function startWirePaymentAction(
+  orderNumber: string,
+): Promise<ActionResult<{ url: string }>> {
+  const order = await findOwnedOrder(orderNumber);
+  if (!order?.payment) return { success: false, error: "Захиалга олдсонгүй." };
+
+  if (order.payment.status === "PAID") {
+    return { success: false, error: "Энэ захиалга аль хэдийн төлөгдсөн." };
+  }
+
+  if (order.status === "CANCELLED") {
+    return {
+      success: false,
+      error: "Цуцлагдсан захиалгын төлбөр төлөх боломжгүй.",
+    };
+  }
+
+  if (!isWireConfigured()) {
+    return {
+      success: false,
+      error: "wire.mn тохируулаагүй байна. .env файлд түлхүүрээ нэмнэ үү.",
+    };
+  }
+
+  try {
+    const appUrl = getAppUrl();
+
+    const intent = await createWireIntent({
+      orderNumber: order.orderNumber,
+      // Дүнг DB-ээс авна — browser-аас ирсэн утгад итгэхгүй
+      amountTugrik: order.payment.amount,
+      description: `HANNAH захиалга ${order.orderNumber}`,
+    });
+
+    const session = await createWireCheckoutSession({
+      intentId: intent.id,
+      orderNumber: order.orderNumber,
+      successUrl: `${appUrl}/order/${order.orderNumber}`,
+      cancelUrl: `${appUrl}/order/${order.orderNumber}/pay`,
+    });
+
+    // Intent-ийн дугаарыг хадгална — webhook ирэхэд шалгахад хэрэгтэй
+    await prisma.payment.update({
+      where: { id: order.payment.id },
+      data: { wireIntentId: intent.id },
+    });
+
+    return { success: true, data: { url: session.url } };
+  } catch (error) {
+    console.error("wire.mn:", error);
+    return {
+      success: false,
+      error: "Төлбөрийн хуудас нээж чадсангүй. Дахин оролдоно уу.",
+    };
+  }
+}
+
 export async function submitBankTransferAction(
   orderNumber: string,
   input: unknown,

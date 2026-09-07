@@ -4,9 +4,11 @@ import { ArrowLeft, CircleCheck, Truck } from "lucide-react";
 
 import { getOrderByNumber } from "@/lib/queries/order.query";
 import { isQpayConfigured } from "@/lib/qpay";
+import { isWireConfigured, isWireTestMode } from "@/lib/wire";
 import { formatPrice } from "@/lib/utils";
 
 import { QpayPanel } from "@/components/payment/qpay-panel";
+import { WirePanel } from "@/components/payment/wire-panel";
 import { BankTransferPanel } from "@/components/payment/bank-transfer-panel";
 import { TestPaymentPanel } from "@/components/payment/test-payment-panel";
 
@@ -113,6 +115,19 @@ function PaymentBody({
         href={`/order/${orderNumber}`}
         linkLabel="Захиалгаа харах"
       />
+    );
+  }
+
+  // WIRE — түлхүүр тохируулаагүй бол туршилтын самбар
+  if (method === "WIRE") {
+    return isWireConfigured() ? (
+      <WirePanel
+        orderNumber={orderNumber}
+        amount={amount}
+        testMode={isWireTestMode()}
+      />
+    ) : (
+      <TestPaymentPanel orderNumber={orderNumber} />
     );
   }
 
