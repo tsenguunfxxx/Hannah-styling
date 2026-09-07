@@ -1,4 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#111110"/>
-  <path d="M9 8v16M23 8v16M9 16h14" stroke="#f2f1ed" stroke-width="2.5" stroke-linecap="square"/>
+<!--
+  Сайтын tab дээрх жижиг тэмдэг (favicon).
+
+  Navbar дахь логотой ЯГ ижил эрвээхэй. Ялгаа нь ганцхан:
+  зураасны зузааныг 4-өөс 6.5 болгож нэмсэн. Учир нь энэ зураг
+  16×16 пиксел болж жижгэрэхэд нимгэн зураас бүдгэрч алга болдог.
+
+  Өнгө солих бол доорх хоёр утгыг л засна:
+    #f2f1ed — дэвсгэр (bone)
+    #111110 — эрвээхэй (ink)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" fill="#f2f1ed"/>
+
+  <!-- Дөрвөн дэлбээ нэг цэгээс тарна: дээд том хос, доод жижиг хос -->
+  <g
+    transform="translate(50 48)"
+    fill="none"
+    stroke="#111110"
+    stroke-width="6.5"
+    stroke-linejoin="round"
+  >
+    <path d="M0 0 A20 30 0 0 1 0 -58 A20 30 0 0 1 0 0Z" transform="rotate(-46)"/>
+    <path d="M0 0 A20 30 0 0 1 0 -58 A20 30 0 0 1 0 0Z" transform="rotate(46)"/>
+    <path d="M0 0 A15 22 0 0 1 0 -44 A15 22 0 0 1 0 0Z" transform="rotate(-138)"/>
+    <path d="M0 0 A15 22 0 0 1 0 -44 A15 22 0 0 1 0 0Z" transform="rotate(138)"/>
+  </g>
+
+  <!-- Доод хоёр дэлбээний хооронд байрлах бие -->
+  <path d="M50 60 L53 68 L50 76 L47 68Z" fill="#111110"/>
 </svg>
