@@ -170,7 +170,8 @@ export const BANK_ACCOUNTS = [
  * Зураг нь 3:4 харьцаатай (жишээ нь 1536×2048) байвал хамгийн зөв.
  */
 export const HERO = {
-  image:
-    "https://scontent.fuln2-2.fna.fbcdn.net/v/t39.30808-6/724446010_1511923790637439_5165653369202081936_n.jpg?stp=dst-jpg_tt6&cstp=mx1536x2048&ctp=s1536x2048&_nc_cat=109&ccb=1-7&_nc_sid=833d8c&_nc_ohc=EuCvZZNb8ikQ7kNvwFdOlw3&_nc_oc=AdqGUz-wbGk7xdOKMXrU5l_QOW92WqDOH7AxXeG04Gts3s6Db0Ga9dDFbwjqMfgguDs&_nc_zt=23&_nc_ht=scontent.fuln2-2.fna&_nc_gid=HIc2NdlDvjBNqDDyN-lb4A&_nc_ss=7b2a8&oh=00_AQEHqYYIkwJokSV2CtNYXeoJcciRrGV72wsYxys0RnBUTA&oe=6A96D625",
+  // Зургаа `public/images/` хавтсанд хийж, эндээс замыг нь заана.
+  // Замд `public` гэдэг үгийг БИЧИХГҮЙ — "/images/..." гэж эхэлнэ.
+  image: "/images/hero.jpg",
   alt: "Намрын шинэ цуглуулга",
 } as const;

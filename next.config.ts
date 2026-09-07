@@ -14,7 +14,6 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "images.unsplash.com" }, // туршилтын зураг
-      { protocol: "https", hostname: "*.fbcdn.net" }, // Facebook CDN-ийн бүх subdomain-ийг зөвшөөрнө
     ],
   },
 };

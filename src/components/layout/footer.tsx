@@ -53,7 +53,9 @@ export function Footer() {
           {/* Хар дэвсгэр дээр лого нь currentColor-оор цайван болно */}
           <Logo className="items-start gap-1.5" />
 
-          <p className="mt-4 max-w-xs text-sm text-bone/60">{SITE.description}</p>
+          <p className="mt-4 max-w-xs text-sm text-bone/60">
+            {SITE.description}
+          </p>
 
           <div className="mt-6 flex items-center gap-4">
             {SOCIALS.map((social) => {
@@ -102,7 +104,7 @@ export function Footer() {
       <div className="border-t border-bone/10">
         <div className="container-shop flex flex-col items-center justify-between gap-3 py-6 sm:flex-row">
           <p className="label text-bone/40">
-            © {new Date().getFullYear()} {SITE.name}. Бүх эрх хуулиар хамгаалагдсан.
+            {new Date().getFullYear()} Бүх эрх хуулиар хамгаалагдсан.
           </p>
           <p className="label text-bone/40">Улаанбаатар, Монгол</p>
         </div>

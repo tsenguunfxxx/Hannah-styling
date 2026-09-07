@@ -26,10 +26,13 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
         <div className="flex h-14 items-center gap-3 px-4 lg:px-6">
           <AdminMobileNav />
 
+          {/*
+            "HANNAH" бичиг хассан. Хяналтын самбар руу буцах холбоосыг
+            алдахгүйн тулд "Админ" гэдгийг өөрийг нь холбоос болгов.
+          */}
           <Link href="/admin" className="label tracking-wordmark">
-            HANNAH
+            Админ
           </Link>
-          <span className="label text-bone/50">Админ</span>
 
           <div className="ml-auto flex items-center gap-4">
             <span className="label hidden text-bone/60 sm:block">

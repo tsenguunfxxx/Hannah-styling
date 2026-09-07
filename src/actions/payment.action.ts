@@ -101,7 +101,14 @@ export async function startQpayPaymentAction(
   }
 
   try {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    /*
+      Төгсгөлийн "/"-г хасна. Vercel дээр хаягаа хуулж тавихад ихэвчлэн
+      "https://site.vercel.app/" гэж ордог — тэгвэл доорх холбоос
+      "...app//api/..." болж хоёр ташуу зураастай болно.
+    */
+    const appUrl = (
+      process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3100"
+    ).replace(/\/+$/, "");
 
     const invoice = await createQpayInvoice({
       senderInvoiceNo: order.orderNumber,
