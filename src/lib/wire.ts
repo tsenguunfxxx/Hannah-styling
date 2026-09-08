@@ -27,13 +27,22 @@ const SIGNATURE_HEADER = "wirepayment-signature";
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 
 /**
- * Wire нь дүнг ЖИЖИГ НЭГЖЭЭР авдаг (50000 = 500.00₮).
- * Манай сан төгрөгөөр бүхэл тоогоор хадгалдаг тул 100-гаар үржүүлнэ.
+ * Wire рүү явуулах дүн — ТӨГРӨГӨӨР, яг байгаагаар нь.
+ *
+ * ⚠️ Энд нэг удаа алдаа гаргасан түүх бий. Баримт бичигт дүнг
+ * "minor units" гэж бичсэн (жишээ нь `50000 = 500.00`) тул 100-аар
+ * үржүүлж байсан. Үр дүнд 249,000₮-ийн захиалга төлбөрийн хуудсан
+ * дээр 24,900,000₮ болж гарч ирсэн.
+ *
+ * Бодит байдал: төгрөг нь ЖИЖИГ НЭГЖГҮЙ (мөнгө хэдийн хэрэглээнээс
+ * гарсан). Тиймээс Wire төгрөгийн дүнг шууд хүлээж авдаг.
+ *
+ * Энэ функцийг устгалгүй үлдээсэн шалтгаан: дүн хөрвүүлэх логик
+ * НЭГ л газар байх ёстой. Хэрэв ирээдүйд өөр валют нэмбэл энд л
+ * засна, дуудаж буй газруудыг хөндөхгүй.
  */
-const MINOR_UNITS = 100;
-
 export function toWireAmount(tugrik: number): number {
-  return Math.round(tugrik * MINOR_UNITS);
+  return Math.round(tugrik);
 }
 
 /** Тохиргоог уншина. Түлхүүр байхгүй бол null → Wire санал болгохгүй. */
@@ -136,7 +145,16 @@ export async function createWireIntent(input: {
   description: string;
 }): Promise<WirePaymentIntent> {
   return wireFetch<WirePaymentIntent>("/payment_intents", {
-    idempotencyKey: `order-${input.orderNumber}`,
+    /*
+      Түлхүүрт ДҮНГ ч оруулсан нь чухал.
+
+      Idempotency-Key нь "ижил хүсэлт хоёр удаа явбал нэг л үр дүн"
+      гэсэн баталгаа өгдөг — Wire ижил түлхүүртэй хүсэлтэд хуучин
+      хариугаа буцаана. Хэрэв зөвхөн захиалгын дугаараар түлхүүрлэвэл
+      дүн өөрчлөгдсөн ч (жишээ нь алдаа зассаны дараа) Wire хуучин
+      БУРУУ дүнтэй нэхэмжлэхээ л буцаасаар байх болно.
+    */
+    idempotencyKey: `order-${input.orderNumber}-${toWireAmount(input.amountTugrik)}`,
     body: {
       amount: toWireAmount(input.amountTugrik),
       currency: "MNT",
@@ -154,12 +172,12 @@ export async function createWireIntent(input: {
  */
 export async function createWireCheckoutSession(input: {
   intentId: string;
-  orderNumber: string;
   successUrl: string;
   cancelUrl: string;
 }): Promise<{ id: string; url: string }> {
   return wireFetch<{ id: string; url: string }>("/checkout/sessions", {
-    idempotencyKey: `session-${input.orderNumber}`,
+    // Нэхэмжлэх шинэчлэгдвэл төлөх хуудас ч шинэчлэгдэх ёстой
+    idempotencyKey: `session-${input.intentId}`,
     body: {
       payment_intent: input.intentId,
       success_url: input.successUrl,

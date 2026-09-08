@@ -129,7 +129,6 @@ export async function startWirePaymentAction(
 
     const session = await createWireCheckoutSession({
       intentId: intent.id,
-      orderNumber: order.orderNumber,
       successUrl: `${appUrl}/order/${order.orderNumber}`,
       cancelUrl: `${appUrl}/order/${order.orderNumber}/pay`,
     });
