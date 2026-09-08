@@ -1,16 +1,26 @@
 "use client";
 
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { ChevronDown, CreditCard, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  useTransition } from "react"; import { useRouter } from "next/navigation"; import { useForm } from "react-hook-form"; import { zodResolver } from "@hookform/resolvers/zod"; import { toast } from "sonner"; import { ChevronDown,
-  Loader2 } from "lucide-react";  import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input"; import { Textarea } from "@/components/ui/textarea"; import {   Form,
+  Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { cn, formatPrice } from "@/lib/utils";
-import { DISTRICTS, PAYMENT_METHODS } from "@/lib/constants";
+import { formatPrice } from "@/lib/utils";
+import { COUNTRYSIDE, DISTRICTS, PAYMENT_METHODS } from "@/lib/constants";
 import { checkoutSchema, type CheckoutInput } from "@/schemas/order.schema";
 import { createOrderAction } from "@/actions/order.action";
 
@@ -43,6 +53,17 @@ export function CheckoutForm({
       ...defaultValues,
     },
   });
+
+  /*
+    Сонгосон дүүргийг хянана — утга солигдох бүрд талбарууд шууд
+    өөрчлөгдөнө.
+
+    `form.watch` биш `useWatch` ашигласан шалтгаан: эхнийх нь бүхэл
+    маягтыг дахин зурдаг бөгөөд React Compiler түүнийг оновчилж
+    чаддаггүй. `useWatch` нь ЗӨВХӨН энэ нэг талбарыг сонсоно.
+  */
+  const district = useWatch({ control: form.control, name: "district" });
+  const isCountryside = district === COUNTRYSIDE;
 
   function onSubmit(values: CheckoutInput) {
     startTransition(async () => {
@@ -113,11 +134,27 @@ export function CheckoutForm({
               name="district"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="label text-graphite">Дүүрэг</FormLabel>
+                  <FormLabel className="label text-graphite">
+                    Дүүрэг / Орон нутаг
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <select
                         {...field}
+                        onChange={(event) => {
+                          field.onChange(event);
+
+                          /*
+                            Орон нутаг сонгоход "хороо, байр, тоот"
+                            талбар алга болно. Түүнд бичсэн утга
+                            үлдвэл харагдахгүй атлаа хамт илгээгдэнэ —
+                            тиймээс цэвэрлэнэ.
+                          */
+                          if (event.target.value === COUNTRYSIDE) {
+                            form.setValue("addressLine", "");
+                            form.clearErrors("addressLine");
+                          }
+                        }}
                         className="h-11 w-full appearance-none border border-line bg-transparent px-3 pr-9 text-sm outline-none focus-visible:border-ink"
                       >
                         {DISTRICTS.map((district) => (
@@ -134,25 +171,28 @@ export function CheckoutForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="addressLine"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="label text-graphite">
-                    Хороо, байр, тоот
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="5-р хороо, 32-р байр, 14 тоот"
-                      autoComplete="street-address"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Улаанбаатарт л утгатай — орон нутагт хороо, байр гэж байхгүй */}
+            {!isCountryside && (
+              <FormField
+                control={form.control}
+                name="addressLine"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="label text-graphite">
+                      Хороо, байр, тоот
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="5-р хороо, 32-р байр, 14 тоот"
+                        autoComplete="street-address"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -160,15 +200,24 @@ export function CheckoutForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="label text-graphite">
-                    Нэмэлт тэмдэглэл
+                    {isCountryside ? "Дэлгэрэнгүй мэдээлэл" : "Нэмэлт тэмдэглэл"}
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      rows={3}
-                      placeholder="Хүргэлтийн цаг, орцны код гэх мэт"
+                      rows={isCountryside ? 4 : 3}
+                      placeholder={
+                        isCountryside
+                          ? "Аймаг, сум, хүлээж авах цэг, холбоо барих хүн"
+                          : "Хүргэлтийн цаг, орцны код гэх мэт"
+                      }
                       {...field}
                     />
                   </FormControl>
+                  {isCountryside && (
+                    <FormDescription>
+                      Хүргэгч танд хүрэхэд хангалттай мэдээллийг бичнэ үү.
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -178,54 +227,25 @@ export function CheckoutForm({
 
         {/* --- ТӨЛБӨР --- */}
         <section>
-          <h2 className="label border-b border-line pb-3">Төлбөрийн арга</h2>
+          <h2 className="label border-b border-line pb-3">Төлбөр</h2>
 
-          <FormField
-            control={form.control}
-            name="paymentMethod"
-            render={({ field }) => (
-              <FormItem className="mt-6">
-                <div className="grid gap-3" role="radiogroup">
-                  {PAYMENT_METHODS.map((method) => (
-                    <button
-                      key={method.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={field.value === method.value}
-                      onClick={() => field.onChange(method.value)}
-                      className={cn(
-                        "flex items-center gap-3 border px-4 py-4 text-left transition-colors",
-                        field.value === method.value
-                          ? "border-ink"
-                          : "border-line hover:border-graphite",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "grid size-4 shrink-0 place-items-center rounded-full border",
-                          field.value === method.value
-                            ? "border-ink"
-                            : "border-line",
-                        )}
-                      >
-                        {field.value === method.value && (
-                          <span className="size-2 rounded-full bg-ink" />
-                        )}
-                      </span>
+          {/*
+            Арга нэг л байгаа тул СОНГОХ зүйл алга — radio харуулах
+            нь хуурамч сонголт болно. Оронд нь юу болохыг товч хэлнэ.
 
-                      <span className="min-w-0">
-                        <span className="block text-sm">{method.label}</span>
-                        <span className="block text-xs text-graphite">
-                          {method.hint}
-                        </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            `paymentMethod` талбар нь маягтын анхдагч утгаараа (WIRE)
+            дамжсаар байна — зөвхөн харагдац өөрчлөгдсөн.
+          */}
+          <div className="mt-6 flex items-start gap-3 border border-line p-4">
+            <CreditCard className="mt-0.5 size-4 shrink-0" strokeWidth={1.5} />
+            <div className="min-w-0">
+              <p className="text-sm">{PAYMENT_METHODS[0].label}</p>
+              <p className="mt-1 text-xs leading-relaxed text-graphite">
+                Захиалга баталгаажсаны дараа төлбөрийн хуудас нээгдэнэ.
+                Банкны апп, цахим хэтэвч, QR-аас сонгоно.
+              </p>
+            </div>
+          </div>
         </section>
 
         <Button

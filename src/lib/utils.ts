@@ -101,3 +101,15 @@ export function formatShortDateTime(date: Date): string {
   const { month, day, hour, minute } = dateParts(date);
   return `${month}.${day} ${hour}:${minute}`;
 }
+
+/**
+ * Хүргэлтийн хаягийг уншихад тохиромжтой мөр болгоно.
+ *
+ * "Орон нутаг" гэдэг нь дүүрэг БИШ тул "Орон нутаг дүүрэг" гэж
+ * бичихгүй. Мөн тэр тохиолдолд дэлгэрэнгүй хаяг нь тэмдэглэл
+ * талбарт байдаг тул энд хоосон буцаана.
+ */
+export function formatDeliveryArea(city: string, district: string): string {
+  if (district === "Орон нутаг") return "Орон нутаг";
+  return `${city}, ${district} дүүрэг`;
+}

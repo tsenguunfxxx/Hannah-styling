@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import { getAdminOrderByNumber } from "@/lib/queries/admin/order.query";
-import { formatDateTime, formatPrice } from "@/lib/utils";
+import { formatDateTime, formatDeliveryArea, formatPrice } from "@/lib/utils";
 import { PAYMENT_METHODS, type PaymentStatusKey } from "@/lib/constants";
 
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
@@ -163,7 +163,7 @@ export default async function AdminOrderPage({
 
               <Field label="Хаяг">
                 <span className="block">
-                  {order.city}, {order.district} дүүрэг
+                  {formatDeliveryArea(order.city, order.district)}
                 </span>
                 <span className="block">{order.addressLine}</span>
               </Field>

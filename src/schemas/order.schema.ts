@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DISTRICTS, PAYMENT_METHODS } from "@/lib/constants";
+import { COUNTRYSIDE, DISTRICTS, PAYMENT_METHODS } from "@/lib/constants";
 
 /**
  * Захиалга баталгаажуулах маягтын шалгалт.
@@ -26,21 +26,55 @@ export const checkoutSchema = z.object({
 
   district: z.enum(DISTRICTS, { message: "Дүүргээ сонгоно уу." }),
 
+  /*
+    Улаанбаатарт ЗААВАЛ, орон нутагт хоосон байж болно.
+    Тиймээс энд зөвхөн уртыг шалгаад, "заавал эсэх"-ийг доорх
+    `superRefine` дотор дүүргээс хамааруулж шийднэ.
+  */
   addressLine: z
     .string()
     .trim()
-    .min(5, { message: "Хороо, байр, тоотоо дэлгэрэнгүй бичнэ үү." })
     .max(200, { message: "Хаяг хэт урт байна." }),
 
   note: z
     .string()
     .trim()
-    .max(300, { message: "Тэмдэглэл хэт урт байна." })
+    .max(500, { message: "Мэдээлэл хэт урт байна." })
     .optional(),
 
   paymentMethod: z.enum(paymentValues, {
     message: "Төлбөрийн аргаа сонгоно уу.",
   }),
-});
+})
+  /*
+    Хүргэлтийн хаягийг ХОЁР янзаар цуглуулна:
+
+      Улаанбаатар  → "Хороо, байр, тоот" заавал
+      Орон нутаг   → тэр талбар байхгүй, оронд нь дэлгэрэнгүй
+                     мэдээлэл (аймаг, сум, хүлээж авах цэг) заавал
+
+    Аль ч тохиолдолд хүргэгч хүрэх хаягтай үлдэнэ.
+  */
+  .superRefine((data, ctx) => {
+    if (data.district === COUNTRYSIDE) {
+      if (!data.note || data.note.length < 10) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["note"],
+          message:
+            "Аймаг, сум, хүлээж авах цэгээ дэлгэрэнгүй бичнэ үү.",
+        });
+      }
+      return;
+    }
+
+    if (data.addressLine.length < 5) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["addressLine"],
+        message: "Хороо, байр, тоотоо дэлгэрэнгүй бичнэ үү.",
+      });
+    }
+  });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

@@ -5,11 +5,12 @@ import { CircleCheck, CreditCard } from "lucide-react";
 
 import { getOrderByNumber } from "@/lib/queries/order.query";
 import { Button } from "@/components/ui/button";
-import { formatDateTime, formatPrice } from "@/lib/utils";
+import { formatDateTime, formatDeliveryArea, formatPrice } from "@/lib/utils";
 import { PAYMENT_METHODS, type PaymentStatusKey } from "@/lib/constants";
 
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
 import { PaymentStatusBadge } from "@/components/order/payment-status-badge";
+import { PayNowButton } from "@/components/payment/pay-now-button";
 import { OrderTimeline } from "@/components/order/order-timeline";
 import { CancelOrderButton } from "@/components/order/cancel-order-button";
 
@@ -188,7 +189,7 @@ export default async function OrderPage({
             <p>{order.phone}</p>
             {order.email && <p>{order.email}</p>}
             <p className="mt-2">
-              {order.city}, {order.district} дүүрэг
+              {formatDeliveryArea(order.city, order.district)}
             </p>
             <p>{order.addressLine}</p>
             {order.note && (
@@ -217,17 +218,28 @@ export default async function OrderPage({
               Хоёр гол үйлдэл ЗЭРЭГЦЭЭ байрлана — "төлөх" эсвэл
               "цуцлах". Өмнө нь цуцлах нь барааны жагсаалтын доор,
               өөр газар байсан тул хайх шаардлагатай байв.
+
+              Wire бол цорын ганц арга тул товч дарангуут ШУУД төлөх
+              хуудас руу очно. Өмнө нь завсрын хуудсаар дамжиж, тэнд
+              дахин ижил нэртэй товч дарах шаардлагатай байв.
             */}
-            {needsPayment && (
-              <Button
-                className="label mt-4 h-11 w-full"
-                nativeButton={false}
-                render={<Link href={`/order/${order.orderNumber}/pay`} />}
-              >
-                <CreditCard className="size-4" />
-                Төлбөр төлөх
-              </Button>
-            )}
+            {needsPayment &&
+              (order.payment?.method === "WIRE" ? (
+                <PayNowButton orderNumber={order.orderNumber} />
+              ) : (
+                /*
+                  Хуучин аргаар (шилжүүлэг, QPay) үүссэн захиалгууд —
+                  тэдгээрийн зааврыг тусдаа хуудсанд харуулна.
+                */
+                <Button
+                  className="label mt-4 h-11 w-full"
+                  nativeButton={false}
+                  render={<Link href={`/order/${order.orderNumber}/pay`} />}
+                >
+                  <CreditCard className="size-4" />
+                  Төлбөр төлөх
+                </Button>
+              ))}
 
             {CANCELLABLE.includes(order.status) && (
               <CancelOrderButton orderNumber={order.orderNumber} />
