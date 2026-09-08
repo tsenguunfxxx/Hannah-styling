@@ -116,17 +116,39 @@ function PaymentBody({
     );
   }
 
-  // WIRE — түлхүүр тохируулаагүй бол туршилтын самбар
   if (method === "WIRE") {
-    return isWireConfigured() ? (
-      <WirePanel
-        orderNumber={orderNumber}
-        amount={amount}
-        testMode={isWireTestMode()}
-      />
-    ) : (
-      <TestPaymentPanel orderNumber={orderNumber} />
-    );
+    if (isWireConfigured()) {
+      return (
+        <WirePanel
+          orderNumber={orderNumber}
+          amount={amount}
+          testMode={isWireTestMode()}
+        />
+      );
+    }
+
+    /*
+      Түлхүүр тохируулаагүй.
+
+      ХӨГЖҮҮЛЭЛТЭД — туршилтын самбар харуулж, урсгалыг шалгах боломж өгнө.
+
+      БОДИТ САЙТАД — туршилтын самбар харуулж БОЛОХГҮЙ. Түүний товч
+      production дээр ажиллахгүй тул худалдан авагч дарж дарсаар
+      юу ч болохгүй, шалтгааныг нь ойлгохгүй үлдэнэ. Оронд нь
+      шууд ойлгомжтой мэдэгдэл + холбоо барих зам өгнө.
+    */
+    if (process.env.NODE_ENV === "production") {
+      return (
+        <Notice
+          title="Онлайн төлбөр түр боломжгүй"
+          description={`${formatPrice(amount)}-ийн төлбөрөө хийхийн тулд бидэнтэй холбогдоно уу. Захиалга тань хадгалагдсан.`}
+          href="/contact"
+          linkLabel="Холбоо барих"
+        />
+      );
+    }
+
+    return <TestPaymentPanel orderNumber={orderNumber} />;
   }
 
   if (method === "BANK_TRANSFER") {
@@ -155,7 +177,18 @@ function PaymentBody({
     );
   }
 
-  // Тохируулаагүй gateway — зөвхөн хөгжүүлэлтэд туршилтын самбар
+  // Танихгүй арга — хөгжүүлэлтэд туршилтын самбар, бодит сайтад мэдэгдэл
+  if (process.env.NODE_ENV === "production") {
+    return (
+      <Notice
+        title="Онлайн төлбөр түр боломжгүй"
+        description={`${formatPrice(amount)}-ийн төлбөрөө хийхийн тулд бидэнтэй холбогдоно уу.`}
+        href="/contact"
+        linkLabel="Холбоо барих"
+      />
+    );
+  }
+
   return <TestPaymentPanel orderNumber={orderNumber} />;
 }
 
