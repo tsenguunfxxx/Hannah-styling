@@ -6,6 +6,7 @@
  * Зөвхөн хөгжүүлэлтийн database дээр ажиллуулна.
  */
 import "dotenv/config";
+import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -379,12 +380,30 @@ async function main() {
   await prisma.user.deleteMany();
   console.log("🧹 Хуучин өгөгдөл цэвэрлэгдлээ");
 
+  /*
+    ТУРШИЛТЫН НУУЦ ҮГ
+
+    Өмнө нь энд "Admin123!" гэж ЗАДГАЙГААР бичээстэй байсан. Тэр код
+    GitHub дээр байдаг тул хэн ч уншиж, дэлгүүрийн админ руу орох
+    боломжтой байлаа.
+
+    Одоо:
+      - `.env` дотор SEED_ADMIN_PASSWORD байвал түүнийг ашиглана
+      - байхгүй бол САНАМСАРГҮЙ үүсгээд, ажиллаж дуусахад л хэвлэнэ
+
+    Аль ч тохиолдолд нууц үг кодын дотор үлдэхгүй.
+  */
+  const adminPassword =
+    process.env.SEED_ADMIN_PASSWORD?.trim() || randomPassword();
+  const customerPassword =
+    process.env.SEED_CUSTOMER_PASSWORD?.trim() || randomPassword();
+
   // --- 2. Хэрэглэгчид ---
   const admin = await prisma.user.create({
     data: {
       name: "Hannah Admin",
       email: "admin@hannah.mn",
-      password: bcrypt.hashSync("Admin123!", 10),
+      password: bcrypt.hashSync(adminPassword, 10),
       role: "ADMIN",
       phone: "99119911",
     },
@@ -394,7 +413,7 @@ async function main() {
     data: {
       name: "Батбаяр",
       email: "bat@example.com",
-      password: bcrypt.hashSync("Bat12345!", 10),
+      password: bcrypt.hashSync(customerPassword, 10),
       role: "CUSTOMER",
       phone: "88008800",
       addresses: {
@@ -555,8 +574,9 @@ async function main() {
   console.log("🎟️  2 купон үүслээ");
 
   console.log("\n✅ Seed амжилттай дууслаа.");
-  console.log("   Админ:    admin@hannah.mn / Admin123!");
-  console.log("   Хэрэглэгч: bat@example.com / Bat12345!\n");
+  console.log(`   Админ:     admin@hannah.mn / ${adminPassword}`);
+  console.log(`   Хэрэглэгч: bat@example.com / ${customerPassword}`);
+  console.log("\n   ⚠️ Дээрх нууц үгийг ОДОО хуулж аваарай — дахин харагдахгүй.\n");
 }
 
 main()
@@ -567,3 +587,13 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+/**
+ * Санамсаргүй нууц үг үүсгэнэ.
+ *
+ * Auth.js-ийн шалгалтад тэнцэхийн тулд том үсэг, жижиг үсэг, тоо
+ * гурвуулаа заавал багтсан байх ёстой.
+ */
+function randomPassword(): string {
+  return "Hn" + randomBytes(6).toString("hex") + "9";
+}

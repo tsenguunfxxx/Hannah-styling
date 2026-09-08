@@ -408,10 +408,6 @@ model Payment {
   amount Int
 
   transactionId String? // Банкны гүйлгээний дугаар
-  /// ХУУЧИРСАН — QPay хассан. Бүх мөрөнд хоосон байгаа тул
-  /// дараагийн deploy-ийн дараа устгаж болно.
-  qpayInvoiceId String?
-
   /// wire.mn-ий PaymentIntent (pi_...). Төлбөр төлөгдсөн эсэхийг
   /// дараа нь ЭНЭ дугаараар шалгана.
   wireIntentId String?
