@@ -37,7 +37,14 @@ export function CartSummary({
           </Row>
         )}
 
-        <Row label="Хүргэлт">{formatPrice(totals.shippingFee)}</Row>
+        {/* 0 үед "0₮" биш "Үнэгүй" гэж бичих нь ойлгомжтой */}
+        <Row label="Хүргэлт">
+          {totals.shippingFee === 0 ? (
+            <span className="text-ink">Үнэгүй</span>
+          ) : (
+            formatPrice(totals.shippingFee)
+          )}
+        </Row>
       </dl>
 
       {/* Купон */}
