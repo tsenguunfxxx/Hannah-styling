@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import { getAdminOrderByNumber } from "@/lib/queries/admin/order.query";
-import { formatPrice } from "@/lib/utils";
+import { formatDateTime, formatPrice } from "@/lib/utils";
 import { PAYMENT_METHODS, type PaymentStatusKey } from "@/lib/constants";
 
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
@@ -267,12 +267,3 @@ function Row({
   );
 }
 
-function formatDateTime(date: Date) {
-  return new Intl.DateTimeFormat("mn-MN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}

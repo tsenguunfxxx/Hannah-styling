@@ -66,12 +66,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
 
-  if (event.type !== "payment_intent.succeeded") {
-    /*
-      Бусад үйл явдлыг сонирхохгүй ч 200 буцаана.
-      Алдаа буцаавал wire.mn "хүрч чадсангүй" гэж үзээд дахин дахин
-      илгээх гэж оролдоно.
-    */
+  /*
+    Бидний сонирхдог хоёр төрөл: төлөгдсөн, эсвэл бүтэлгүйтсэн.
+    Бусдыг нь 200-аар өнгөрөөнө — алдаа буцаавал wire.mn "хүрч
+    чадсангүй" гэж үзээд дахин дахин илгээх гэж оролдоно.
+  */
+  const succeeded = event.type === "payment_intent.succeeded";
+  const failed = FAILURE_EVENTS.includes(event.type ?? "");
+
+  if (!succeeded && !failed) {
     return NextResponse.json({ received: true });
   }
 
@@ -91,7 +94,7 @@ export async function POST(request: Request) {
   */
   const payment = await prisma.payment.findFirst({
     where: { wireIntentId: intentId },
-    select: { id: true, status: true, order: { select: { orderNumber: true } } },
+    select: { id: true, orderId: true, status: true },
   });
 
   if (!payment) {
@@ -104,29 +107,78 @@ export async function POST(request: Request) {
   }
 
   try {
-    // 2-р хамгаалалт: Wire-ээс өөрсдөө асууна
+    /*
+      2-р хамгаалалт: Wire-ээс ӨӨРСДӨӨ асууна.
+
+      Мэдэгдэлд бичсэнийг шууд үнэн гэж авахгүй. Гарын үсэг зөв
+      байсан ч сүлжээнд саатсан хуучин мэдэгдэл дахин ирж болно.
+      Эх сурвалжаас нь асуух нь цорын ганц найдвартай зам.
+    */
     const intent = await retrieveWireIntent(intentId);
 
-    if (intent.status !== "succeeded") {
-      return NextResponse.json({ status: "NOT_PAID" });
+    if (intent.status === "succeeded") {
+      /*
+        Төлбөр БОЛОН захиалгыг ЗЭРЭГ шинэчилнэ.
+
+        Хоёрыг нэг гүйлгээнд оруулсан шалтгаан: аль нэг нь бүтэлгүйтвэл
+        хоёулаа хуучин хэвээрээ үлдэнэ. Үгүй бол "төлбөр төлөгдсөн
+        мөртлөө захиалга хүлээгдэж байна" гэсэн зөрүү үүсэж болно.
+      */
+      await prisma.$transaction([
+        prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: "PAID",
+            paidAt: new Date(),
+            transactionId: intentId,
+          },
+        }),
+        /*
+          Захиалга "Хүлээгдэж байна" дээр байвал л баталгаажуулна.
+          Хэрэв админ аль хэдийн урагшлуулсан (жишээ нь хүргэлтэнд
+          гаргасан) бол түүнийг БУЦААХГҮЙ.
+        */
+        prisma.order.updateMany({
+          where: { id: payment.orderId, status: "PENDING" },
+          data: { status: "CONFIRMED" },
+        }),
+      ]);
+
+      return NextResponse.json({ status: "PAID" });
     }
 
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: "PAID",
-        paidAt: new Date(),
-        transactionId: intentId,
-      },
-    });
+    // Бүтэлгүйтсэн эсэх нь Wire дээрх ЖИНХЭНЭ төлвөөр шийдэгдэнэ
+    if (intent.status === "canceled") {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: "FAILED" },
+      });
 
-    return NextResponse.json({ status: "PAID" });
+      return NextResponse.json({ status: "FAILED" });
+    }
+
+    // Хараахан төлөгдөөгүй — юу ч өөрчлөхгүй
+    return NextResponse.json({ status: "NOT_PAID" });
   } catch (error) {
     console.error("wire.mn callback:", error);
     // 500 буцаавал wire.mn дахин оролдоно — түр зуурын саатал бол зөв зан
     return NextResponse.json({ error: "Шалгаж чадсангүй" }, { status: 500 });
   }
 }
+
+/**
+ * Төлбөр бүтэлгүйтсэнийг илэрхийлэх үйл явдлууд.
+ *
+ * Wire-ийн баримт бичигт бүтэн жагсаалт байхгүй тул түгээмэл
+ * нэрсийг бүгдийг нь барина. Аль нь ирсэн ч дээрх код Wire-ээс
+ * жинхэнэ төлвийг асууж баталгаажуулдаг тул алдаа гарахгүй.
+ */
+const FAILURE_EVENTS = [
+  "payment_intent.failed",
+  "payment_intent.payment_failed",
+  "payment_intent.canceled",
+  "payment_intent.cancelled",
+];
 
 // ------------------------------------------------------------
 

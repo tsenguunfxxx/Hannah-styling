@@ -44,3 +44,60 @@ export function discountPercent(price: number, discount: number): number {
   if (!discount || discount >= price) return 0;
   return Math.round(((price - discount) / price) * 100);
 }
+
+/**
+ * ОГНОО ФОРМАТЛАХ
+ *
+ * ЦАГИЙН БҮС ЯАГААД ЧУХАЛ ВЭ:
+ *   Хуудсууд серверт зурагддаг. Vercel-ийн сервер UTC цагаар
+ *   ажилладаг тул бүсийг заахгүй бол Монголын цагаас 8 цаг зөрнө.
+ *   Шөнийн 01:00-д хийсэн захиалга өмнөх өдрийн 17:00 гэж харагдана.
+ *   Тиймээс бүсийг ЗААВАЛ шууд зааж өгнө.
+ *
+ * ЯАГААД ГАРААР УГСАРСАН БЭ:
+ *   `Intl`-ийн "mn-MN" хэл нь орчноос хамаарч өөр өөр бичдэг
+ *   ("2026.9.8", "26/9/8", "9-р сарын 8"). Хэсэг бүрийг нь салгаж
+ *   аваад өөрсдөө угсарснаар ХААНА Ч ижил харагдана.
+ */
+const UB_TIMEZONE = "Asia/Ulaanbaatar";
+
+function dateParts(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: UB_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+
+  return {
+    year: get("year"),
+    month: get("month"),
+    day: get("day"),
+    hour: get("hour"),
+    minute: get("minute"),
+  };
+}
+
+/** 2026 оны 9-р сарын 8 → "2026.09.08" */
+export function formatDate(date: Date): string {
+  const { year, month, day } = dateParts(date);
+  return `${year}.${month}.${day}`;
+}
+
+/** → "2026.09.08 14:30" */
+export function formatDateTime(date: Date): string {
+  const { year, month, day, hour, minute } = dateParts(date);
+  return `${year}.${month}.${day} ${hour}:${minute}`;
+}
+
+/** Жилгүй богино хэлбэр — хүснэгтэд өргөн хэмнэнэ: "09.08 14:30" */
+export function formatShortDateTime(date: Date): string {
+  const { month, day, hour, minute } = dateParts(date);
+  return `${month}.${day} ${hour}:${minute}`;
+}

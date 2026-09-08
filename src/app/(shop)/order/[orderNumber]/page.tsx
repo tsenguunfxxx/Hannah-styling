@@ -5,7 +5,7 @@ import { CircleCheck, CreditCard } from "lucide-react";
 
 import { getOrderByNumber } from "@/lib/queries/order.query";
 import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/utils";
+import { formatDateTime, formatPrice } from "@/lib/utils";
 import { PAYMENT_METHODS } from "@/lib/constants";
 
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
@@ -55,10 +55,55 @@ export default async function OrderPage({
     order.payment.method !== "COD" &&
     order.status !== "CANCELLED";
 
+  /*
+    Төлбөр амжилттай орсон уу.
+    wire.mn төлбөр дуусмагц энэ хуудас руу буцаан авчирдаг — тэр
+    мөчид баяр хүргэсэн мэдэгдэл харуулах нь хамгийн зөв.
+  */
+  const isPaid = order.payment?.status === "PAID";
+  const paymentFailed = order.payment?.status === "FAILED";
+
   return (
     <div className="container-shop py-12 lg:py-16">
-      {/* Шинэ захиалгын баяр хүргэе */}
-      {isNew && (
+      {/* Төлбөр амжилттай — хамгийн эхэнд, хамгийн тод */}
+      {isPaid && order.status !== "CANCELLED" && (
+        <div className="mb-10 border border-ink bg-ink p-6 text-bone sm:p-8">
+          <div className="flex items-start gap-4">
+            <CircleCheck className="mt-1 size-6 shrink-0" strokeWidth={1.5} />
+            <div>
+              <p className="font-display text-xl uppercase tracking-label sm:text-2xl">
+                Баярлалаа!
+              </p>
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-bone/75">
+                Төлбөр амжилттай хүлээн авлаа. Захиалгыг тань бэлтгэж
+                эхэллээ — бэлэн болмогц бид тантай холбогдоно.
+              </p>
+              <p className="label mt-4 text-bone/50">
+                {order.orderNumber} · {formatPrice(order.total)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Төлбөр амжилтгүй болсон */}
+      {paymentFailed && order.status !== "CANCELLED" && (
+        <div className="mb-10 flex items-start gap-3 border border-sale p-5 text-sale">
+          <CircleCheck className="mt-0.5 size-5 shrink-0" />
+          <div>
+            <p className="font-display text-lg uppercase tracking-label">
+              Төлбөр амжилтгүй боллоо
+            </p>
+            <p className="mt-1 text-sm">
+              Мөнгө таны данснаас хасагдаагүй. Дахин оролдох эсвэл өөр
+              аргаар төлж болно.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Шинэ захиалга — зөвхөн ХАРААХАН төлөөгүй үед */}
+      {isNew && !isPaid && !paymentFailed && (
         <div className="mb-10 flex items-start gap-3 border border-ink p-5">
           <CircleCheck className="mt-0.5 size-5 shrink-0" />
           <div>
@@ -249,12 +294,3 @@ function SummaryRow({
 }
 
 /** 2026 оны 8 сарын 26, 14:32 */
-function formatDateTime(date: Date) {
-  return new Intl.DateTimeFormat("mn-MN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}

@@ -75,12 +75,33 @@ function revalidateOrder(orderNumber: string) {
   revalidatePath(`/admin/orders/${orderNumber}`);
 }
 
-/** Төлбөрийг төлөгдсөн гэж тэмдэглэх — нэг л газар */
-async function markPaid(paymentId: string, transactionId: string | null) {
-  await prisma.payment.update({
-    where: { id: paymentId },
-    data: { status: "PAID", paidAt: new Date(), transactionId },
-  });
+/**
+ * Төлбөрийг төлөгдсөн гэж тэмдэглэх — нэг л газар.
+ *
+ * Захиалгыг ч ЗЭРЭГ баталгаажуулна. Хоёрыг нэг гүйлгээнд оруулсан
+ * тул аль нэг нь бүтэлгүйтвэл хоёулаа хуучин хэвээрээ үлдэнэ —
+ * "төлбөр төлөгдсөн мөртлөө захиалга хүлээгдэж байна" гэсэн
+ * зөрүү үүсэхгүй.
+ */
+async function markPaid(
+  paymentId: string,
+  orderId: string,
+  transactionId: string | null,
+) {
+  await prisma.$transaction([
+    prisma.payment.update({
+      where: { id: paymentId },
+      data: { status: "PAID", paidAt: new Date(), transactionId },
+    }),
+    /*
+      Зөвхөн "Хүлээгдэж байна" төлөвтэй байвал л урагшлуулна.
+      Админ аль хэдийн хүргэлтэнд гаргасан бол буцаахгүй.
+    */
+    prisma.order.updateMany({
+      where: { id: orderId, status: "PENDING" },
+      data: { status: "CONFIRMED" },
+    }),
+  ]);
 }
 
 // ------------------------------------------------------------
@@ -178,7 +199,7 @@ export async function checkWirePaymentAction(
       return { success: true, data: { paid: false } };
     }
 
-    await markPaid(order.payment.id, order.payment.wireIntentId);
+    await markPaid(order.payment.id, order.id, order.payment.wireIntentId);
     revalidateOrder(orderNumber);
 
     return { success: true, data: { paid: true } };
@@ -251,7 +272,7 @@ export async function simulatePaymentAction(
     return { success: false, error: "Энэ захиалга аль хэдийн төлөгдсөн." };
   }
 
-  await markPaid(order.payment.id, `TEST-${Date.now()}`);
+  await markPaid(order.payment.id, order.id, `TEST-${Date.now()}`);
   revalidateOrder(orderNumber);
 
   return { success: true, data: undefined };

@@ -25,13 +25,24 @@ export function OrderFilters({
   counts: Map<OrderStatusKey, number>;
   total: number;
 }) {
+  /*
+    "Хүлээгдэж байна", "Бэлтгэж байна" хоёрыг ЖАГСААЛТААС хассан.
+
+    Тэдгээр төлөв өгөгдлийн санд байсаар байгаа (шинэ захиалга бүр
+    PENDING-ээр эхэлдэг) — зөвхөн шүүлтүүрийн товч харагдахгүй.
+    Тэр захиалгууд "Бүгд" дотор хэвээрээ, алдагдахгүй.
+  */
+  const HIDDEN: OrderStatusKey[] = ["PENDING", "PROCESSING"];
+
   const tabs: { key: OrderStatusKey | "all"; label: string; count: number }[] = [
     { key: "all", label: "Бүгд", count: total },
-    ...(Object.keys(ORDER_STATUS) as OrderStatusKey[]).map((key) => ({
-      key,
-      label: ORDER_STATUS[key].label,
-      count: counts.get(key) ?? 0,
-    })),
+    ...(Object.keys(ORDER_STATUS) as OrderStatusKey[])
+      .filter((key) => !HIDDEN.includes(key))
+      .map((key) => ({
+        key,
+        label: ORDER_STATUS[key].label,
+        count: counts.get(key) ?? 0,
+      })),
   ];
 
   return (

@@ -6,7 +6,7 @@ import {
   getOrderStatusTabs,
   parseAdminOrderFilters,
 } from "@/lib/queries/admin/order.query";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, formatShortDateTime } from "@/lib/utils";
 import { PAYMENT_METHODS, PAYMENT_STATUS, type PaymentStatusKey } from "@/lib/constants";
 
 import { OrderFilters } from "@/components/admin/order-filters";
@@ -91,7 +91,7 @@ export default async function AdminOrdersPage({
                     </td>
 
                     <td className="px-4 py-3 text-graphite tabular-nums">
-                      {formatDate(order.createdAt)}
+                      {formatShortDateTime(order.createdAt)}
                     </td>
 
                     <td className="px-4 py-3">
@@ -146,14 +146,6 @@ function paymentLabel(status: string | undefined) {
   return PAYMENT_STATUS[status as PaymentStatusKey]?.label ?? status;
 }
 
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("mn-MN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
 
 function Th({
   children,

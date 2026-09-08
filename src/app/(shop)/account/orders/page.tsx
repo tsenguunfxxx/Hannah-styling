@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 import { requireAuth } from "@/lib/auth-guard";
 import { getMyOrders } from "@/lib/queries/order.query";
-import { formatPrice } from "@/lib/utils";
+import { formatDate, formatPrice } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
 
@@ -102,10 +102,3 @@ export default async function MyOrdersPage() {
   );
 }
 
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("mn-MN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
-}

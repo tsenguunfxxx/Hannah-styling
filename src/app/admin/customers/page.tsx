@@ -1,7 +1,7 @@
 import { Mail, Phone } from "lucide-react";
 
 import { getCustomers } from "@/lib/queries/admin/customer.query";
-import { formatPrice } from "@/lib/utils";
+import { formatDate, formatPrice } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/empty-state";
 
 export const metadata = { title: "Хэрэглэгч" };
@@ -111,10 +111,3 @@ function Th({
   );
 }
 
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("mn-MN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-}
