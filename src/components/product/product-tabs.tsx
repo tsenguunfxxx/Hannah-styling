@@ -34,10 +34,21 @@ export function ProductTabs({
       <TabsList
         variant="line"
         /*
-          Жижиг дэлгэцэнд табууд нэг мөрөнд багтахгүй тул хажуу тийш
-          гүйдэг болгосон. Хуудас бүхэлдээ гүйхээс сэргийлнэ.
+          Гурван анхаарах зүйл:
+
+          1. `overflow-x-auto` хассан — табууд хоёрхон тул гүйлгэх
+             шаардлагагүй, харин зарим үйлдлийн системд гүйлгэх зурвасыг
+             байнга харуулдаг.
+
+          2. `flex-nowrap` — мөр тасарвал байрлал эвдэрнэ.
+
+          3. Өндрийг `group-data-horizontal/tabs:h-auto` гэж бичсэн нь
+             ЧУХАЛ. Үндсэн компонент өндрийг яг ийм угтвартайгаар
+             (`...:h-8`) тогтоодог тул энгийн `h-auto` хүчингүй болно.
+             Өндөр 32px-т үлдвэл идэвхтэй табын доорх зураас хүрээнээс
+             доогуур тусдаа мөр болж харагдана.
         */
-        className="h-auto w-full justify-start gap-5 overflow-x-auto rounded-none border-b border-line bg-transparent p-0 pb-[5px] sm:gap-8"
+        className="w-full flex-nowrap justify-start gap-5 rounded-none border-b border-line bg-transparent p-0 pb-[5px] group-data-horizontal/tabs:h-auto sm:gap-8"
       >
         {details && (
           <TabsTrigger value="details" className={triggerClass}>
@@ -52,7 +63,8 @@ export function ProductTabs({
 
       {details && (
         <TabsContent value="details" className="pt-8">
-          <p className="max-w-prose text-sm leading-relaxed whitespace-pre-line text-graphite">
+          {/* Саарал биш бараан өнгө — барааны мэдээлэл тул тод байх ёстой */}
+          <p className="max-w-prose text-[15px] leading-relaxed whitespace-pre-line text-ink">
             {details}
           </p>
         </TabsContent>

@@ -3,14 +3,32 @@ import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ORDER_STATUS, type OrderStatusKey } from "@/lib/constants";
 
-/** Захиалгын хэвийн явц — цуцлагдсан нь энэ дараалалд ордоггүй */
-const FLOW: OrderStatusKey[] = [
-  "PENDING",
-  "CONFIRMED",
-  "PROCESSING",
-  "SHIPPED",
-  "DELIVERED",
-];
+/**
+ * Хэрэглэгчид ХАРУУЛАХ алхмууд.
+ *
+ * "Хүлээгдэж байна", "Бэлтгэж байна" хоёрыг харуулахаа больсон —
+ * хэрэглэгчид дотоод ажлын шат биш, бодит явц л сонирхолтой.
+ *
+ * Гэхдээ тэр хоёр төлөв өгөгдлийн санд ХЭВЭЭР байгаа (шинэ захиалга
+ * бүр PENDING-ээр эхэлдэг). Тиймээс доорх STEP_INDEX нь тэдгээрийг
+ * харагдах алхмуудтай тааруулж өгнө.
+ */
+const FLOW: OrderStatusKey[] = ["CONFIRMED", "SHIPPED", "DELIVERED"];
+
+/**
+ * Төлөв бүр аль алхам дээр байгааг заана.
+ *
+ *   PENDING    → -1  (эхний алхам хараахан дуусаагүй)
+ *   PROCESSING →  0  ("Баталгаажсан" дээрээ хэвээр)
+ */
+const STEP_INDEX: Record<OrderStatusKey, number> = {
+  PENDING: -1,
+  CONFIRMED: 0,
+  PROCESSING: 0,
+  SHIPPED: 1,
+  DELIVERED: 2,
+  CANCELLED: -1, // доор тусад нь баригдана
+};
 
 /**
  * Захиалга хаана явж байгааг харуулах зам.
@@ -26,7 +44,7 @@ export function OrderTimeline({ status }: { status: OrderStatusKey }) {
     );
   }
 
-  const currentIndex = FLOW.indexOf(status);
+  const currentIndex = STEP_INDEX[status];
 
   return (
     <ol className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-y-4">

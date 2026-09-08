@@ -74,7 +74,9 @@ export type Size = (typeof SIZES)[number];
 /** Захиалгын төлөв — монгол нэр, дараагийн боломжит төлөв */
 export const ORDER_STATUS = {
   PENDING: { label: "Хүлээгдэж байна", next: ["CONFIRMED", "CANCELLED"] },
-  CONFIRMED: { label: "Баталгаажсан", next: ["PROCESSING", "CANCELLED"] },
+  // "Бэлтгэж байна" алхмыг алгасна — баталгаажсаны дараа шууд хүргэлт
+  CONFIRMED: { label: "Баталгаажсан", next: ["SHIPPED", "CANCELLED"] },
+  // ХУУЧИН захиалгуудад л үлдсэн. Шинээр энэ төлөвт орохгүй.
   PROCESSING: { label: "Бэлтгэж байна", next: ["SHIPPED", "CANCELLED"] },
   SHIPPED: { label: "Хүргэлтэнд гарсан", next: ["DELIVERED"] },
   DELIVERED: { label: "Хүргэгдсэн", next: [] },
@@ -103,9 +105,14 @@ export const PAYMENT_METHODS = [
   { value: "COD", label: "Хүргэлтээр төлөх", hint: "Бараагаа хүлээж авахдаа" },
 ] as const;
 
-/** Хүргэлт */
-export const SHIPPING_FEE = 5000; // ₮
-export const FREE_SHIPPING_THRESHOLD = 150000; // энэ дүнгээс дээш үнэгүй
+/**
+ * Хүргэлтийн төлбөр — БҮХ захиалгад тогтмол.
+ *
+ * "Тодорхой дүнгээс дээш үнэгүй" гэсэн урамшуулал байсныг хассан.
+ * Ганц тогтмол дүн байх нь хэрэглэгчид ойлгомжтой, бидэнд ч
+ * тооцоолол хялбар.
+ */
+export const SHIPPING_FEE = 10000; // ₮
 
 /** Үлдэгдэл энэ тооноос доош болбол "цөөхөн үлдсэн" гэж анхааруулна */
 export const LOW_STOCK_THRESHOLD = 5;

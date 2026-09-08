@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { signOut } from "@/lib/auth";
 
 /**
  * ХҮЧЭЭР ГАРАХ.
@@ -10,19 +9,14 @@ import { redirect } from "next/navigation";
  *   ачаалагдахгүй, бас /login руу ч орж чадахгүй болно —
  *   proxy.ts түүнийг нэвтэрсэн гэж үзээд буцаачихдаг.
  *
- * Энэ хаяг session-ий cookie-г арчаад /login руу гаргана.
- * /api доор байгаа тул proxy.ts-ийн шалгалтад орохгүй.
+ * Cookie-г ГАРААР устгах гэж оролдох нь найдваргүй: Auth.js нь
+ * орчноос хамаарч өөр нэр хэрэглэдэг (`authjs.session-token`,
+ * `__Secure-...`), мөн token урт бол хэд хуваан хадгалдаг.
+ * Тиймээс Auth.js-ийн ӨӨРИЙН `signOut`-ыг дуудна — тэр бүх
+ * хэсгийг нь зөв арчина.
+ *
+ * Энэ хаяг /api доор байгаа тул proxy.ts-ийн шалгалтад орохгүй.
  */
 export async function GET() {
-  const cookieStore = await cookies();
-
-  // Auth.js өөр өөр орчинд өөр нэр хэрэглэдэг:
-  // authjs.session-token, __Secure-authjs.session-token, next-auth.session-token
-  for (const cookie of cookieStore.getAll()) {
-    if (cookie.name.includes("authjs") || cookie.name.includes("next-auth")) {
-      cookieStore.delete(cookie.name);
-    }
-  }
-
-  redirect("/login");
+  await signOut({ redirectTo: "/login" });
 }

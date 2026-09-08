@@ -93,7 +93,7 @@ export function VariantPicker({
     if (variant) setQuantity((q) => Math.min(q, variant.stock));
   }
 
-  function handleAdd(thenGoToCart: boolean) {
+  function handleAdd(thenCheckout: boolean) {
     if (!selected) {
       toast.error(color ? "Размераа сонгоно уу." : "Өнгө, размераа сонгоно уу.");
       return;
@@ -115,7 +115,12 @@ export function VariantPicker({
       // Navbar дээрх сагсны тоог шинэчилнэ
       router.refresh();
 
-      if (thenGoToCart) router.push("/cart");
+      /*
+        "Шууд худалдаж авах" нь сагс биш ТӨЛБӨР рүү очно.
+        Сагс руу оруулбал хэрэглэгч дахин нэг товч дарах шаардлагатай
+        болж, "шууд" гэсэн амлалт нь утгагүй болно.
+      */
+      if (thenCheckout) router.push("/checkout");
     });
   }
 

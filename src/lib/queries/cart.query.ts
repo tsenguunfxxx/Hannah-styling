@@ -10,6 +10,26 @@ import type { Prisma } from "@/generated/prisma/client";
 export const CART_COOKIE = "hannah_cart";
 
 /**
+ * Нэвтэрсэн хэрэглэгчийн id — ЗӨВХӨН тэр хэрэглэгч үнэхээр байгаа бол.
+ *
+ * Нэвтрэх мэдээлэл cookie дотор JWT хэлбэрээр хадгалагддаг тул
+ * админ хэрэглэгчийг устгасан ч тэр cookie хүчинтэй хэвээр үлддэг.
+ * Шалгахгүй бол байхгүй хэрэглэгчийн сагсыг хайж, сагс байнга
+ * хоосон харагдах эсвэл "Foreign key" алдаа өгнө.
+ *
+ * Сагс УНШИХ, БИЧИХ хоёр зам энэ нэг функцийг ашиглана —
+ * ингэснээр хоёулаа үргэлж ижил сагс руу заана.
+ */
+export async function getVerifiedUserId(): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user) return null;
+
+  const exists = await prisma.user.count({ where: { id: session.user.id } });
+
+  return exists > 0 ? session.user.id : null;
+}
+
+/**
  * Одоогийн хүний сагсыг ЯАЖ олох вэ гэдэг нөхцөл.
  *
  * Нэвтэрсэн бол userId-гаар, зочин бол cookie доторх id-гаар.
@@ -19,8 +39,8 @@ export const CART_COOKIE = "hannah_cart";
  * "хэний сагс вэ" гэдэг логик нэг л газар бичигдсэн.
  */
 export async function getCartWhere(): Promise<Prisma.CartWhereInput | null> {
-  const session = await auth();
-  if (session?.user) return { userId: session.user.id };
+  const userId = await getVerifiedUserId();
+  if (userId) return { userId };
 
   const sessionId = (await cookies()).get(CART_COOKIE)?.value;
   if (sessionId) return { sessionId };

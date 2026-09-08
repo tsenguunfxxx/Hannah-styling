@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { Truck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import type { CartTotals } from "@/lib/cart-utils";
 import {
   CouponForm,
@@ -24,18 +22,6 @@ export function CartSummary({
   /** Үлдэгдэл хүрэлцэхгүй мөр байвал үргэлжлүүлэхийг зогсооно */
   blocked?: boolean;
 }) {
-  const isFreeShipping = totals.shippingFee === 0;
-
-  // Үнэгүй хүргэлт хүртэл хэдэн хувь явсныг харуулна
-  const progress = Math.min(
-    100,
-    Math.round(
-      ((FREE_SHIPPING_THRESHOLD - totals.untilFreeShipping) /
-        FREE_SHIPPING_THRESHOLD) *
-        100,
-    ),
-  );
-
   return (
     <div className="border border-line p-6">
       <h2 className="label border-b border-line pb-4">Захиалгын хураангуй</h2>
@@ -51,13 +37,7 @@ export function CartSummary({
           </Row>
         )}
 
-        <Row label="Хүргэлт">
-          {isFreeShipping ? (
-            <span className="text-ink">Үнэгүй</span>
-          ) : (
-            formatPrice(totals.shippingFee)
-          )}
-        </Row>
+        <Row label="Хүргэлт">{formatPrice(totals.shippingFee)}</Row>
       </dl>
 
       {/* Купон */}
@@ -70,32 +50,6 @@ export function CartSummary({
         <span className="font-display text-xl tabular-nums">
           {formatPrice(totals.total)}
         </span>
-      </div>
-
-      {/* Үнэгүй хүргэлтийн явц */}
-      <div className="mt-6 bg-sand p-4">
-        <p className="flex items-start gap-2 text-xs leading-relaxed">
-          <Truck className="mt-0.5 size-3.5 shrink-0" />
-          {totals.untilFreeShipping > 0 ? (
-            <span>
-              Дахин <strong>{formatPrice(totals.untilFreeShipping)}</strong>-ийн
-              бараа нэмбэл хүргэлт үнэгүй.
-            </span>
-          ) : (
-            <span>Танай захиалгын хүргэлт үнэгүй.</span>
-          )}
-        </p>
-
-        <div
-          className="mt-3 h-0.5 w-full bg-line"
-          role="progressbar"
-          aria-valuenow={progress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Үнэгүй хүргэлт хүртэлх явц"
-        >
-          <div className="h-full bg-ink" style={{ width: `${progress}%` }} />
-        </div>
       </div>
 
       {blocked ? (

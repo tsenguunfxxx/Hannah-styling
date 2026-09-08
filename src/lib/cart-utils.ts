@@ -1,4 +1,4 @@
-import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/constants";
+import { SHIPPING_FEE } from "@/lib/constants";
 
 /**
  * Сагсны ТООЦООЛОЛ.
@@ -39,7 +39,6 @@ export type CartTotals = {
   /** Эцсийн төлөх дүн */
   total: number;
   /** Үнэгүй хүргэлт хүртэл дутуу байгаа дүн. 0 бол аль хэдийн үнэгүй */
-  untilFreeShipping: number;
 };
 
 /**
@@ -65,10 +64,7 @@ export function calculateCartTotals(
   const afterDiscount = subtotal - safeDiscount;
 
   // Хоосон сагсанд хүргэлтийн төлбөр бодохгүй
-  const shippingFee =
-    subtotal === 0 || afterDiscount >= FREE_SHIPPING_THRESHOLD
-      ? 0
-      : SHIPPING_FEE;
+  const shippingFee = subtotal === 0 ? 0 : SHIPPING_FEE;
 
   return {
     subtotal,
@@ -76,6 +72,5 @@ export function calculateCartTotals(
     discount: safeDiscount,
     shippingFee,
     total: afterDiscount + shippingFee,
-    untilFreeShipping: Math.max(0, FREE_SHIPPING_THRESHOLD - afterDiscount),
   };
 }

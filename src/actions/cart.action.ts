@@ -4,8 +4,11 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { CART_COOKIE, getCartWhere } from "@/lib/queries/cart.query";
+import {
+  CART_COOKIE,
+  getCartWhere,
+  getVerifiedUserId,
+} from "@/lib/queries/cart.query";
 import {
   addToCartSchema,
   removeCartItemSchema,
@@ -25,12 +28,18 @@ const GUEST_CART_MAX_AGE = 60 * 60 * 24 * 30; // 30 хоног
  * Ингэснээр нэвтрээгүй ч гэсэн сагсанд бараа хийж чадна.
  */
 async function getOrCreateCart(): Promise<string> {
-  const session = await auth();
+  /*
+    Хэрэглэгч ҮНЭХЭЭР байгаа эсэхийг шалгасан id.
+    Устгагдсан хэрэглэгчийн хуучин cookie-тэй хүн энд null авна —
+    тэгээд доорх зочны сагс руу зөөлөн шилжинэ. Уншихдаа ч
+    (cart.query.ts) яг ижил функц ашигладаг тул хоёр зам салахгүй.
+  */
+  const userId = await getVerifiedUserId();
 
-  if (session?.user) {
+  if (userId) {
     const cart = await prisma.cart.upsert({
-      where: { userId: session.user.id },
-      create: { userId: session.user.id },
+      where: { userId },
+      create: { userId },
       update: {},
       select: { id: true },
     });
