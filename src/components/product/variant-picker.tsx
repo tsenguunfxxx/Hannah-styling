@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
@@ -35,12 +35,20 @@ export function VariantPicker({
   discountPrice,
   variants,
   inWishlist,
+  afterPrice,
 }: {
   productId: string;
   basePrice: number;
   discountPrice: number | null;
   variants: VariantLike[];
   inWishlist: boolean;
+  /**
+   * Үнэ болон өнгөний ХООРОНД байрлах агуулга.
+   *
+   * Server дээр бэлдэгдсэн JSX-ээр дамжина — ингэснээр доторх
+   * өгөгдөл (сэтгэгдэл г.м) browser руу нэмэлт JavaScript авчрахгүй.
+   */
+  afterPrice?: ReactNode;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -119,6 +127,8 @@ export function VariantPicker({
         size="lg"
         showPercent
       />
+
+      {afterPrice && <div className="mt-8">{afterPrice}</div>}
 
       {/* ӨНГӨ */}
       <fieldset className="mt-8">

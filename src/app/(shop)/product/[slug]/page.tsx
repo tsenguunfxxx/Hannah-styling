@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Truck, RefreshCw, ShieldCheck } from "lucide-react";
 
 import {
   getProductBySlug,
   getRelatedProducts,
 } from "@/lib/queries/product.query";
 import { getWishlistProductIds } from "@/actions/wishlist.action";
-import { formatPrice } from "@/lib/utils";
-import { FREE_SHIPPING_THRESHOLD, SITE } from "@/lib/constants";
+import { SITE } from "@/lib/constants";
 
 import { ProductGallery } from "@/components/product/product-gallery";
 import { VariantPicker } from "@/components/product/variant-picker";
@@ -118,42 +116,32 @@ export default async function ProductPage({
             discountPrice={product.discountPrice}
             variants={product.variants}
             inWishlist={wishlistIds.includes(product.id)}
+            /*
+              Табууд нь үнэ болон өнгөний ХООРОНД байрлана.
+              Хуудсын доод хэсэгт байхад хэрэглэгч гүйлгэж очих
+              шаардлагатай байсан — энд эхний харцанд өртөнө.
+            */
+            afterPrice={
+              <div id="tabs" className="scroll-mt-24">
+                <ProductTabs
+                  details={product.details}
+                  reviewCount={product.reviews.length}
+                  reviews={
+                    <div className="space-y-8">
+                      {/* Бичих маягт эхэнд — үйлдэл нүдэнд шууд өртөнө */}
+                      <ReviewForm
+                        productId={product.id}
+                        eligibility={reviewEligibility}
+                      />
+                      <ProductReviews reviews={product.reviews} />
+                    </div>
+                  }
+                />
+              </div>
+            }
           />
-
-          {/* Үйлчилгээний баталгаа */}
-          <ul className="mt-10 space-y-3 border-t border-line pt-6 text-sm text-graphite">
-            <Guarantee icon={Truck}>
-              {formatPrice(FREE_SHIPPING_THRESHOLD)}-с дээш захиалгад хүргэлт
-              үнэгүй
-            </Guarantee>
-            <Guarantee icon={RefreshCw}>
-              14 хоногийн дотор буцаах, солих боломжтой
-            </Guarantee>
-            <Guarantee icon={ShieldCheck}>
-              Албан ёсны баталгаат бүтээгдэхүүн
-            </Guarantee>
-          </ul>
         </div>
       </div>
-
-      {/* Табууд */}
-      <section id="tabs" className="mt-20 scroll-mt-24 lg:mt-28">
-        <ProductTabs
-          description={product.description}
-          details={product.details}
-          reviewCount={product.reviews.length}
-          reviews={
-            <div className="space-y-8">
-              {/* Бичих маягт эхэнд — үйлдэл нүдэнд шууд өртөнө */}
-              <ReviewForm
-                productId={product.id}
-                eligibility={reviewEligibility}
-              />
-              <ProductReviews reviews={product.reviews} />
-            </div>
-          }
-        />
-      </section>
 
       {/* Холбоотой бараа */}
       {related.length > 0 && (
@@ -167,21 +155,5 @@ export default async function ProductPage({
         </section>
       )}
     </div>
-  );
-}
-
-/** Үйлчилгээний нөхцөлийн нэг мөр */
-function Guarantee({
-  icon: Icon,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  children: React.ReactNode;
-}) {
-  return (
-    <li className="flex items-center gap-3">
-      <Icon className="size-4 shrink-0 text-ink" />
-      {children}
-    </li>
   );
 }
