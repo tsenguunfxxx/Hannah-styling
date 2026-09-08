@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { registerSchema, type RegisterInput } from "@/schemas/auth.schema";
 import { registerAction } from "@/actions/auth.action";
+import { LOGIN_REQUIRED } from "@/lib/auth-messages";
 
 /**
  * Бүртгүүлэх маягт.
@@ -30,6 +32,7 @@ import { registerAction } from "@/actions/auth.action";
  *  - нууц үгийг харах/нуух нүдэн товч
  */
 export function RegisterForm() {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Хоёр нууц үгийн талбар тус тусдаа харагдах эсэхээ хадгална
@@ -51,9 +54,20 @@ export function RegisterForm() {
     startTransition(async () => {
       const result = await registerAction(values);
 
-      if (result && !result.success) {
-        toast.error(result.error);
+      if (!result || result.success) return;
+
+      /*
+        Бүртгэл үүссэн ч автомат нэвтрэлт бүтсэнгүй.
+        Алдаа гэж айлгахын оронд нэвтрэх хуудас руу зөөлөн зална —
+        хэрэглэгчийн хийх зүйл ганцхан: нэвтрэх.
+      */
+      if (result.info === LOGIN_REQUIRED) {
+        toast.success(result.error);
+        router.push("/login");
+        return;
       }
+
+      toast.error(result.error);
     });
   }
 

@@ -18,6 +18,7 @@ import {
   isPhoneNumber,
 } from "@/schemas/auth.schema";
 import { issueResetCode, verifyResetCode } from "@/lib/reset-code";
+import { LOGIN_REQUIRED } from "@/lib/auth-messages";
 import type { ResetChannel } from "@/generated/prisma/enums";
 
 /**
@@ -83,16 +84,43 @@ export async function registerAction(values: unknown): Promise<ActionState> {
     },
   });
 
-  // Бүртгүүлмэгц шууд нэвтрүүлнэ.
-  // Талбарын нэр нь `identifier` — нэвтрэх маягт утас/имэйл хоёрыг
-  // нэг талбараар авдаг тул энд ч мөн адил нэрээр дамжуулна.
-  await signIn("credentials", {
-    identifier: normalizedEmail,
-    password,
-    redirectTo: "/",
-  });
+  /*
+    Бүртгүүлмэгц шууд нэвтрүүлнэ.
 
-  return { success: true };
+    Талбарын нэр нь `identifier` — нэвтрэх маягт утас/имэйл хоёрыг
+    нэг талбараар авдаг тул энд ч мөн адил нэрээр дамжуулна.
+
+    try/catch ЗААВАЛ хэрэгтэй. Энэ мөрөнд хүрэхэд хэрэглэгчийн
+    бүртгэл АЛЬ ХЭДИЙН үүссэн байна. Хэрэв автомат нэвтрэлт ямар
+    нэг шалтгаанаар бүтэлгүйтвэл (сүлжээ, session бичих алдаа г.м)
+    баригдаагүй алдаа хуудсыг бүхэлд нь унагаана — хэрэглэгч
+    "бүртгэл үүссэн үү, үгүй юү" гэдгээ ойлгохгүй улаан алдааны
+    дэлгэц хараад үлдэнэ.
+  */
+  try {
+    await signIn("credentials", {
+      identifier: normalizedEmail,
+      password,
+      redirectTo: "/",
+    });
+
+    return { success: true };
+  } catch (error) {
+    /*
+      Амжилттай нэвтрэхэд Next.js "энэ хуудас руу шилж" гэсэн
+      тусгай алдаа шиддэг. Түүнийг барьж авбал шилжилт зогсоно —
+      тиймээс ЗӨВХӨН нэвтрэлтийн алдааг барьж, бусдыг цааш дамжуулна.
+    */
+    if (error instanceof AuthError) {
+      return {
+        success: false,
+        error: "Бүртгэл үүслээ. Одоо нэвтэрнэ үү.",
+        info: LOGIN_REQUIRED,
+      };
+    }
+
+    throw error;
+  }
 }
 
 // ------------------------------------------------------------
