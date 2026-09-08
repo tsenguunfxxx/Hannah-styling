@@ -22,9 +22,12 @@ const provider = process.env.EMAIL_PROVIDER?.trim().toLowerCase() ?? "";
 /**
  * Resend-ийн туршилтын хаяг.
  *
- * Өөрийн домэйнөө баталгаажуулаагүй байхад ЗӨВХӨН энэ хаягаас илгээж болно.
- * Гэхдээ ийм үед захидал нь Resend-д бүртгүүлсэн ӨӨРИЙН чинь имэйл рүү л очно.
- * Бодит хэрэглэгчид рүү илгээхийн тулд домэйнөө баталгаажуулах ёстой.
+ * Домэйнөө баталгаажуулаагүй үед ЗӨВХӨН энэ хаягаас илгээж болно.
+ * Түүнээс ч гадна захидал нь Resend-д бүртгүүлсэн ӨӨРИЙН имэйл рүү
+ * л хүрнэ — өөр хүн рүү илгээх гэвэл Resend 403 буцаана.
+ *
+ * Бодит худалдан авагчид руу илгээхийн тулд resend.com/domains дээр
+ * домэйнөө баталгаажуулж, EMAIL_FROM-ыг тэр домэйны хаяг болгоно.
  */
 const RESEND_TEST_FROM = "onboarding@resend.dev";
 
@@ -82,20 +85,29 @@ async function sendWithResend(to: string, subject: string, html: string) {
   if (!response.ok) {
     const body = await response.text();
 
-    // Хамгийн түгээмэл 2 алдааг монголоор тайлбарлана
-    if (response.status === 403 && body.includes("domain")) {
-      throw new Error(
-        `Resend: "${fromAddress()}" хаягийн домэйн баталгаажаагүй байна. ` +
-          `resend.com/domains дээр домэйнөө нэмэх, эсвэл EMAIL_FROM-ыг ` +
-          `"${RESEND_TEST_FROM}" болгож туршина уу.`,
-      );
-    }
-
     if (response.status === 401) {
       throw new Error("Resend: RESEND_API_KEY буруу байна.");
     }
 
-    throw new Error(`Resend алдаа (${response.status}): ${body}`);
+    /*
+      Resend өөрөө маш тодорхой алдаа буцаадаг. Жишээ нь:
+      "You can only send testing emails to your own email address
+      (xxx@gmail.com)". Түүнийг өөрсдийн таамаглалаар солих нь
+      буруу чиглүүлнэ — эх мессежийг нь дамжуулах нь илүү тустай.
+    */
+    const detail = parseResendMessage(body);
+
+    throw new Error(`Resend алдаа (${response.status}): ${detail}`);
+  }
+}
+
+/** Resend-ийн JSON хариунаас уншихад ойлгомжтой мессежийг салгана */
+function parseResendMessage(body: string): string {
+  try {
+    const parsed = JSON.parse(body) as { message?: string };
+    return parsed.message ?? body.slice(0, 300);
+  } catch {
+    return body.slice(0, 300);
   }
 }
 
