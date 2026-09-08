@@ -1,0 +1,16 @@
+<!-- HANNAH STYLING — эрвээхэй тэмдэг. Бараан хувилбар (цайвар дэвсгэрт). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <g
+    transform="translate(50 48)"
+    fill="none"
+    stroke="#111110"
+    stroke-width="4"
+    stroke-linejoin="round"
+  >
+    <path d="M0 0 A20 30 0 0 1 0 -58 A20 30 0 0 1 0 0Z" transform="rotate(-46)"/>
+    <path d="M0 0 A20 30 0 0 1 0 -58 A20 30 0 0 1 0 0Z" transform="rotate(46)"/>
+    <path d="M0 0 A15 22 0 0 1 0 -44 A15 22 0 0 1 0 0Z" transform="rotate(-138)"/>
+    <path d="M0 0 A15 22 0 0 1 0 -44 A15 22 0 0 1 0 0Z" transform="rotate(138)"/>
+  </g>
+  <path d="M50 60 L53 68 L50 76 L47 68Z" fill="#111110"/>
+</svg>

@@ -1,0 +1,40 @@
+<!--
+  HANNAH STYLING — бүтэн лого (тэмдэг + нэр). Бараан хувилбар.
+
+  АНХААР: нэрийг "Jost" фонтоор бичсэн. Тэр фонт суулгаагүй
+  компьютер дээр өөр фонтоор орлуулж харагдана. Фонтыг үнэгүй
+  татах: fonts.google.com/specimen/Jost
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 160" width="1140" height="480">
+  <g transform="translate(140 10)">
+    <g
+      transform="translate(50 48)"
+      fill="none"
+      stroke="#111110"
+      stroke-width="4"
+      stroke-linejoin="round"
+    >
+      <path d="M0 0 A20 30 0 0 1 0 -58 A20 30 0 0 1 0 0Z" transform="rotate(-46)"/>
+      <path d="M0 0 A20 30 0 0 1 0 -58 A20 30 0 0 1 0 0Z" transform="rotate(46)"/>
+      <path d="M0 0 A15 22 0 0 1 0 -44 A15 22 0 0 1 0 0Z" transform="rotate(-138)"/>
+      <path d="M0 0 A15 22 0 0 1 0 -44 A15 22 0 0 1 0 0Z" transform="rotate(138)"/>
+    </g>
+    <path d="M50 60 L53 68 L50 76 L47 68Z" fill="#111110"/>
+  </g>
+
+  <!--
+    textLength нь бичгийн ӨРГӨНИЙГ тогтоож өгнө. Ингэснээр өөр
+    фонтоор орлуулагдсан ч лого хэвээрээ, хүрээнээсээ гарахгүй.
+  -->
+  <text
+    x="190"
+    y="142"
+    text-anchor="middle"
+    textLength="300"
+    lengthAdjust="spacing"
+    font-family="Jost, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="21"
+    font-weight="400"
+    fill="#111110"
+  >HANNAH STYLING</text>
+</svg>

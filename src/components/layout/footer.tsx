@@ -50,8 +50,14 @@ export function Footer() {
       {/* Холбоосууд */}
       <div className="container-shop grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          {/* Хар дэвсгэр дээр лого нь currentColor-оор цайван болно */}
-          <Logo className="items-start gap-1.5" />
+          {/*
+            Хар дэвсгэр дээр лого нь currentColor-оор цайван болно.
+            `w-fit` — лого нь баганы бүтэн өргөнийг эзлэхгүй, зөвхөн
+            өөрийн хэмжээгээр зогсоно. Ингэснээр эрвээхэй нь НЭРИЙНХЭЭ
+            голд тулна, харин лого өөрөө доорх бичигтэй зүүн талаараа
+            эгнэсэн хэвээр үлдэнэ.
+          */}
+          <Logo className="w-fit gap-1.5" />
 
           <p className="mt-4 max-w-xs text-sm text-bone/60">
             {SITE.description}

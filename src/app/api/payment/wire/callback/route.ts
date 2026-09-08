@@ -53,13 +53,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Гарын үсэг буруу" }, { status: 401 });
   }
 
-  let event: {
-    type?: string;
-    data?: { object?: { id?: string; metadata?: { order_number?: string } } };
-  };
+  let event: WireEvent;
 
   try {
-    event = JSON.parse(rawBody);
+    event = JSON.parse(rawBody) as WireEvent;
   } catch {
     return NextResponse.json({ error: "JSON буруу" }, { status: 400 });
   }
@@ -70,41 +67,39 @@ export async function POST(request: Request) {
   }
 
   if (event.type !== "payment_intent.succeeded") {
-    // Бусад үйл явдлыг сонирхохгүй ч 200 буцаана.
-    // Алдаа буцаавал wire.mn дахин дахин илгээх гэж оролдоно.
+    /*
+      Бусад үйл явдлыг сонирхохгүй ч 200 буцаана.
+      Алдаа буцаавал wire.mn "хүрч чадсангүй" гэж үзээд дахин дахин
+      илгээх гэж оролдоно.
+    */
     return NextResponse.json({ received: true });
   }
 
-  const intentId = event.data?.object?.id;
-  const orderNumber = event.data?.object?.metadata?.order_number;
+  const intentId = extractIntentId(event);
 
-  if (!intentId || !orderNumber) {
-    return NextResponse.json({ error: "Мэдээлэл дутуу" }, { status: 400 });
-  }
-
-  const order = await prisma.order.findUnique({
-    where: { orderNumber },
-    select: {
-      payment: {
-        select: { id: true, status: true, amount: true, wireIntentId: true },
-      },
-    },
-  });
-
-  if (!order?.payment) {
-    return NextResponse.json({ error: "Захиалга олдсонгүй" }, { status: 404 });
+  if (!intentId) {
+    return NextResponse.json({ error: "Нэхэмжлэх олдсонгүй" }, { status: 400 });
   }
 
   /*
-    Мэдэгдэл дэх intent нь ЭНЭ захиалгынх мөн эсэхийг шалгана.
-    Үгүй бол өөр захиалгын амжилттай төлбөрийг иш татаж
-    төлөөгүй захиалгаа төлөгдсөн болгох боломж үүснэ.
+    Захиалгыг МЕТАДАТА-гаар биш, нэхэмжлэхийн дугаараар олно.
+
+    Яагаад? Мэдэгдлийн дотоод бүтэц баримт бичигт заагаагүй тул
+    metadata дамжиж ирнэ гэдэгт найдах эрсдэлтэй. Харин `wireIntentId`-г
+    бид ӨӨРСДӨӨ хадгалсан — тиймээс дугаараар нь эргүүлж олоход
+    хангалттай. Ингэснээр өөр захиалгын төлбөрийг иш татах ч аргагүй.
   */
-  if (order.payment.wireIntentId !== intentId) {
-    return NextResponse.json({ error: "Нэхэмжлэх таарахгүй" }, { status: 409 });
+  const payment = await prisma.payment.findFirst({
+    where: { wireIntentId: intentId },
+    select: { id: true, status: true, order: { select: { orderNumber: true } } },
+  });
+
+  if (!payment) {
+    return NextResponse.json({ error: "Захиалга олдсонгүй" }, { status: 404 });
   }
 
-  if (order.payment.status === "PAID") {
+  if (payment.status === "PAID") {
+    // Нэг үйл явдал олон удаа ирж болно — давхар бичихгүй
     return NextResponse.json({ status: "ALREADY_PAID" });
   }
 
@@ -117,7 +112,7 @@ export async function POST(request: Request) {
     }
 
     await prisma.payment.update({
-      where: { id: order.payment.id },
+      where: { id: payment.id },
       data: {
         status: "PAID",
         paidAt: new Date(),
@@ -131,4 +126,68 @@ export async function POST(request: Request) {
     // 500 буцаавал wire.mn дахин оролдоно — түр зуурын саатал бол зөв зан
     return NextResponse.json({ error: "Шалгаж чадсангүй" }, { status: 500 });
   }
+}
+
+// ------------------------------------------------------------
+
+type WireResource = {
+  id?: string;
+  object?: string;
+  payment_intent?: string;
+};
+
+/*
+  `WireResource`-ийн `object` нь төрлийн НЭР (string). Харин үйл явдлын
+  `data.object` нь нөөц ӨӨРӨӨ ч байж болно. Хоёрыг шууд нийлүүлбэл
+  TypeScript `string & object` = боломжгүй төрөл гэж үзнэ. Тиймээс
+  `object`-ыг хасаад дахин зарлана.
+*/
+type WireEventData = Omit<WireResource, "object"> & {
+  object?: WireResource | string;
+};
+
+type WireEvent = {
+  type?: string;
+  data?: WireEventData;
+};
+
+/**
+ * Мэдэгдлээс нэхэмжлэхийн дугаарыг (pi_...) салгаж авна.
+ *
+ * Wire-ийн `data` талбарын дотоод бүтэц баримт бичигт заагаагүй.
+ * Тиймээс хэд хэдэн боломжит байрлалыг шалгана:
+ *
+ *   data.object.id              — нөөцийг `object` дотор боосон
+ *   data.id                     — нөөцийг шууд `data` дотор тавьсан
+ *   data.object.payment_intent  — charge мэт өөр нөөц ирсэн
+ *   data.payment_intent
+ *
+ * Аль нь ч ирсэн ажиллана. Буруу утга ирвэл доорх хайлт олохгүй
+ * тул юу ч өөрчлөгдөхгүй — аюулгүй.
+ */
+function extractIntentId(event: WireEvent): string | null {
+  const data: WireEventData | undefined = event.data;
+  if (!data) return null;
+
+  /*
+    `object` нь нөөцийн ТӨРЛИЙН нэр (string) байж ч болно, эсвэл
+    нөөц өөрөө (object) байж ч болно. Зөвхөн сүүлийнхийг задална.
+  */
+  const nested: WireResource | undefined =
+    data.object !== null && typeof data.object === "object"
+      ? data.object
+      : undefined;
+
+  const candidates = [
+    nested?.id,
+    nested?.payment_intent,
+    data.id,
+    data.payment_intent,
+  ];
+
+  for (const value of candidates) {
+    if (typeof value === "string" && value.startsWith("pi_")) return value;
+  }
+
+  return null;
 }
