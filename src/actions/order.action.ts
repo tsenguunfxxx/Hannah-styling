@@ -9,8 +9,8 @@ import { getCart } from "@/lib/queries/cart.query";
 import { restoreOrderStock } from "@/lib/order-stock";
 import { COUPON_COOKIE } from "@/lib/queries/coupon.query";
 import { checkoutSchema } from "@/schemas/order.schema";
-import { ORDER_NUMBER_PREFIX } from "@/lib/constants";
 import { Prisma } from "@/generated/prisma/client";
+import { ORDER_NUMBER_PREFIX } from "@/lib/constants";
 import type { PaymentMethod } from "@/generated/prisma/enums";
 import type { ActionResult } from "@/types";
 
@@ -31,24 +31,45 @@ class CouponError extends Error {}
  * тийм тохиолдолд database татгалзаж, доор нь дахин оролдоно.
  */
 async function buildOrderNumber(tx: Prisma.TransactionClient): Promise<string> {
-  const now = new Date();
+  /*
+    БҮХ ЦАГ ҮЕД давхардахгүй 4 оронтой дугаар: 0001, 0002, ...
 
-  const startOfDay = new Date(now);
-  startOfDay.setHours(0, 0, 0, 0);
+    Өмнө нь "HN-260908-0019" гэсэн урт хэлбэртэй, дугаарлалт нь
+    ӨДӨР БҮР 0001-ээс эхэлдэг байсан. Богино дугаарыг банкны
+    гүйлгээний утганд ашиглахаар болсон тул тэр арга тохирохгүй —
+    өөр өдрийн хоёр захиалга ижил "0019" болж, аль захиалгын
+    төлбөр болохыг таних боломжгүй болно.
 
-  const countToday = await tx.order.count({
-    where: { createdAt: { gte: startOfDay } },
+    Тиймээс дугаарлалтыг ЕРӨНХИЙ болгосон: хамгийн сүүлийн
+    дугаар дээр нэгийг нэмнэ. Үр дүн нь "HN-0027" — хуучин
+    "HN-260908-0019"-ээс хоёр дахин богино.
+  */
+  const latest = await tx.order.findFirst({
+    orderBy: { createdAt: "desc" },
+    select: { orderNumber: true },
   });
 
-  const datePart = [
-    String(now.getFullYear()).slice(2),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("");
+  /*
+    Хуучин "HN-260908-0019" хэлбэрийн дугаарууд санд үлдсэн.
+    Тэдгээрээс сүүлийн бүлэг тоог л авна. Огт тоо байхгүй бол 0.
+  */
+  const lastDigits = latest?.orderNumber.match(/(\d+)$/)?.[1];
+  const lastNumber = lastDigits ? Number(lastDigits) : 0;
 
-  const sequence = String(countToday + 1).padStart(4, "0");
+  /*
+    Хуучин дугаарууд өдрийн дугаарлалттай тул бага тоо байж болно
+    (жишээ нь 0019). Нийт захиалгын тоотой харьцуулж, аль ИХИЙГ нь
+    авснаар хуучин дугаартай мөргөлдөхгүй.
+  */
+  const total = await tx.order.count();
+  const next = Math.max(lastNumber, total) + 1;
 
-  return `${ORDER_NUMBER_PREFIX}-${datePart}-${sequence}`;
+  /*
+    "HN-" угтвар нь банкны хуулга дээр таних тэмдэг. Гүйлгээний
+    утганд ганц "0027" гэж бичвэл өөр ямар нэг дугаартай андуурч
+    магадгүй — "HN-0027" бол хоёрдмол утгагүй.
+  */
+  return `${ORDER_NUMBER_PREFIX}-${String(next).padStart(4, "0")}`;
 }
 
 /**
@@ -177,7 +198,12 @@ export async function createOrderAction(
 
             customerName: form.customerName,
             phone: form.phone,
-            email: form.email || null,
+            /*
+              Имэйлийг хэрэглэгчээс АСУУХГҮЙ — checkout нь нэвтэрсэн
+              хүнд л нээгддэг тул бүртгэлээс нь шууд авна. Нэг зүйлийг
+              хоёр удаа бичүүлэх нь илүүц, бас бичих алдаа гаргана.
+            */
+            email: session.user.email ?? null,
             district: form.district,
             addressLine: form.addressLine,
             note: form.note || null,

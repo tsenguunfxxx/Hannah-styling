@@ -1,19 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { ChevronDown, Loader2 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Form,
+  useTransition } from "react"; import { useRouter } from "next/navigation"; import { useForm } from "react-hook-form"; import { zodResolver } from "@hookform/resolvers/zod"; import { toast } from "sonner"; import { ChevronDown,
+  Loader2 } from "lucide-react";  import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input"; import { Textarea } from "@/components/ui/textarea"; import {   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -46,7 +36,6 @@ export function CheckoutForm({
     defaultValues: {
       customerName: "",
       phone: "",
-      email: "",
       district: "Баянгол",
       addressLine: "",
       note: "",
@@ -107,28 +96,6 @@ export function CheckoutForm({
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-2">
-                  <FormLabel className="label text-graphite">Имэйл</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="name@example.com"
-                      autoComplete="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Заавал биш. Бичвэл захиалгын мэдээллийг илгээнэ.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

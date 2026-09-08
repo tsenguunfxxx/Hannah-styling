@@ -10,6 +10,8 @@ import {
   isWireConfigured,
   retrieveWireIntent,
 } from "@/lib/wire";
+import { PAYMENT_METHODS } from "@/lib/constants";
+import type { PaymentMethod } from "@/generated/prisma/enums";
 import { bankTransferSchema } from "@/schemas/payment.schema";
 import type { ActionResult } from "@/types";
 
@@ -207,6 +209,57 @@ export async function checkWirePaymentAction(
     console.error("wire.mn шалгалт:", error);
     return { success: false, error: "Төлбөрийг шалгаж чадсангүй." };
   }
+}
+
+/**
+ * Төлбөрийн аргыг СОЛИХ.
+ *
+ * Checkout дээр сонгосон арга нь эцсийн шийдвэр байх албагүй —
+ * хэрэглэгч төлөх гэж байгаад бодлоо өөрчилж болно. Урьд нь
+ * тэр тохиолдолд захиалгаа цуцлаад дахин хийхээс өөр арга байсангүй.
+ */
+export async function changePaymentMethodAction(
+  orderNumber: string,
+  method: string,
+): Promise<ActionResult<void>> {
+  const order = await findOwnedOrder(orderNumber);
+  if (!order?.payment) return { success: false, error: "Захиалга олдсонгүй." };
+
+  if (order.payment.status === "PAID") {
+    return { success: false, error: "Энэ захиалга аль хэдийн төлөгдсөн." };
+  }
+
+  if (order.status === "CANCELLED") {
+    return { success: false, error: "Цуцлагдсан захиалгын төлбөр төлөх боломжгүй." };
+  }
+
+  /*
+    Аргыг ЖАГСААЛТААС шалгана. Browser-аас ирсэн утгад итгэвэл
+    хэн нэгэн санамсаргүй утга илгээж өгөгдлийг эвдэж чадна.
+  */
+  const allowed = PAYMENT_METHODS.some((m) => m.value === method);
+
+  if (!allowed) {
+    return { success: false, error: "Ийм төлбөрийн арга байхгүй." };
+  }
+
+  await prisma.payment.update({
+    where: { id: order.payment.id },
+    data: {
+      method: method as PaymentMethod,
+      /*
+        Арга солиход хуучин нэхэмжлэх утгагүй болно. Цэвэрлэхгүй
+        бол webhook хуучин нэхэмжлэхээр энэ захиалгыг олж, буруу
+        аргаар төлөгдсөн гэж тэмдэглэж болзошгүй.
+      */
+      wireIntentId: null,
+      transactionId: null,
+    },
+  });
+
+  revalidateOrder(orderNumber);
+
+  return { success: true, data: undefined };
 }
 
 export async function submitBankTransferAction(

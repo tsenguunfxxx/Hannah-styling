@@ -74,7 +74,7 @@ export default async function AdminOrdersPage({
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/orders/${order.orderNumber}`}
-                        className="font-display tracking-label hover:underline"
+                        className="font-display text-base tracking-label tabular-nums hover:underline"
                       >
                         {order.orderNumber}
                       </Link>

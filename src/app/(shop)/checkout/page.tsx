@@ -53,7 +53,6 @@ export default async function CheckoutPage() {
   const defaultValues: Partial<CheckoutInput> = {
     customerName: address?.recipientName ?? account.name ?? "",
     phone: address?.phone ?? account.phone ?? "",
-    email: account.email ?? "",
     district: isKnownDistrict(address?.district) ? address.district : "Баянгол",
     addressLine: address?.addressLine ?? "",
   };

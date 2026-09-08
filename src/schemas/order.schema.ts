@@ -24,11 +24,6 @@ export const checkoutSchema = z.object({
     .trim()
     .regex(/^\d{8}$/, { message: "Утасны дугаар 8 оронтой байх ёстой." }),
 
-  // Имэйл заавал биш. Бичсэн бол зөв хэлбэртэй байх ёстой.
-  email: z
-    .union([z.literal(""), z.email({ message: "Имэйл хаяг буруу байна." })])
-    .optional(),
-
   district: z.enum(DISTRICTS, { message: "Дүүргээ сонгоно уу." }),
 
   addressLine: z

@@ -7,6 +7,7 @@ import { isWireConfigured, isWireTestMode } from "@/lib/wire";
 import { formatPrice } from "@/lib/utils";
 
 import { WirePanel } from "@/components/payment/wire-panel";
+import { MethodSwitcher } from "@/components/payment/method-switcher";
 import { BankTransferPanel } from "@/components/payment/bank-transfer-panel";
 import { TestPaymentPanel } from "@/components/payment/test-payment-panel";
 
@@ -50,6 +51,20 @@ export default async function PaymentPage({
       </h1>
 
       <div className="max-w-lg">
+        {/*
+          Аргын сонголт хамгийн ЭХЭНД. Хуудас нээгдмэгц бүх боломж
+          нэг дор харагдана — хэрэглэгч аль аргаар төлөхөө шийдээгүй
+          байж болно.
+
+          Төлөгдсөн, цуцлагдсан захиалгад солих утгагүй тул нуугдана.
+        */}
+        {payment.status === "PENDING" && order.status !== "CANCELLED" && (
+          <MethodSwitcher
+            orderNumber={order.orderNumber}
+            current={payment.method}
+          />
+        )}
+
         <PaymentBody
           orderNumber={order.orderNumber}
           method={payment.method}

@@ -52,7 +52,12 @@ export function CancelOrderButton({ orderNumber }: { orderNumber: string }) {
           <button
             type="button"
             disabled={isPending}
-            className="label inline-flex items-center gap-2 text-graphite underline underline-offset-4 transition-colors hover:text-sale disabled:opacity-40"
+            /*
+              Төлбөрийн товчтой ИЖИЛ хэлбэр — бүтэн өргөн, ижил
+              өндөр. Ялгаа нь зөвхөн хүрээтэй, дүүрэн биш байдал:
+              энэ бол хоёрдогч, буцаах боломжгүй үйлдэл.
+            */
+            className="label mt-3 inline-flex h-11 w-full items-center justify-center gap-2 border border-line text-graphite transition-colors hover:border-sale hover:text-sale disabled:opacity-40"
           />
         }
       >

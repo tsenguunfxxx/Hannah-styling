@@ -47,7 +47,7 @@ export default async function AdminOrderPage({
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl font-medium tracking-label">
+            <h1 className="font-display text-2xl font-medium tracking-label tabular-nums">
               {order.orderNumber}
             </h1>
             <p className="mt-1 text-sm text-graphite">
@@ -141,19 +141,40 @@ export default async function AdminOrderPage({
 
         {/* Хажуугийн мэдээлэл */}
         <aside className="space-y-8">
-          <Block title="Хүлээн авагч">
-            <p>{order.customerName}</p>
-            <p className="tabular-nums">{order.phone}</p>
-            {order.email && <p>{order.email}</p>}
-            <p className="mt-2 text-graphite">
-              {order.city}, {order.district} дүүрэг
-            </p>
-            <p className="text-graphite">{order.addressLine}</p>
-            {order.note && (
-              <p className="mt-2 border-l-2 border-line pl-3 text-graphite">
-                {order.note}
-              </p>
-            )}
+          {/*
+            Хүргэлтийн мэдээллийг ТОМООР, тодоор. Хүргэгч энэ хэсгийг
+            уншиж ажилладаг тул бусад тайлбар шиг бүдэг байх ёсгүй.
+            Утас, хаяг хоёрыг хуулж авахад амар байхаар тусад нь мөр
+            болгосон.
+          */}
+          <Block title="Хүргэлтийн мэдээлэл">
+            <dl className="space-y-3">
+              <Field label="Хүлээн авагч">{order.customerName}</Field>
+
+              <Field label="Утас">
+                <a
+                  href={`tel:${order.phone}`}
+                  className="tabular-nums underline underline-offset-4"
+                >
+                  {order.phone}
+                </a>
+              </Field>
+
+              <Field label="Хаяг">
+                <span className="block">
+                  {order.city}, {order.district} дүүрэг
+                </span>
+                <span className="block">{order.addressLine}</span>
+              </Field>
+
+              {order.note && (
+                <Field label="Тэмдэглэл">
+                  <span className="block border-l-2 border-ink pl-3">
+                    {order.note}
+                  </span>
+                </Field>
+              )}
+            </dl>
           </Block>
 
           <Block title="Хэрэглэгч">
@@ -233,6 +254,22 @@ export default async function AdminOrderPage({
           </Link>
         </aside>
       </div>
+    </div>
+  );
+}
+
+/** Хаягийн нэг мөр — шошго бүдэг, утга тод */
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="label text-graphite">{label}</dt>
+      <dd className="mt-1 text-ink">{children}</dd>
     </div>
   );
 }

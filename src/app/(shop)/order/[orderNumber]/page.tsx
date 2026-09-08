@@ -178,12 +178,6 @@ export default async function OrderPage({
               </li>
             ))}
           </ul>
-
-          {CANCELLABLE.includes(order.status) && (
-            <div className="mt-8">
-              <CancelOrderButton orderNumber={order.orderNumber} />
-            </div>
-          )}
         </div>
 
         {/* Мэдээлэл */}
@@ -213,7 +207,11 @@ export default async function OrderPage({
               </p>
             )}
 
-            {/* Төлөх шаардлагатай бол шууд холбоос */}
+            {/*
+              Хоёр гол үйлдэл ЗЭРЭГЦЭЭ байрлана — "төлөх" эсвэл
+              "цуцлах". Өмнө нь цуцлах нь барааны жагсаалтын доор,
+              өөр газар байсан тул хайх шаардлагатай байв.
+            */}
             {needsPayment && (
               <Button
                 className="label mt-4 h-11 w-full"
@@ -223,6 +221,10 @@ export default async function OrderPage({
                 <CreditCard className="size-4" />
                 Төлбөр төлөх
               </Button>
+            )}
+
+            {CANCELLABLE.includes(order.status) && (
+              <CancelOrderButton orderNumber={order.orderNumber} />
             )}
           </InfoBlock>
 
