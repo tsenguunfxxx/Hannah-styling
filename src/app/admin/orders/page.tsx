@@ -7,7 +7,8 @@ import {
   parseAdminOrderFilters,
 } from "@/lib/queries/admin/order.query";
 import { formatPrice, formatShortDateTime } from "@/lib/utils";
-import { PAYMENT_METHODS, PAYMENT_STATUS, type PaymentStatusKey } from "@/lib/constants";
+import { PAYMENT_METHODS, type PaymentStatusKey } from "@/lib/constants";
+import { PaymentStatusBadge } from "@/components/order/payment-status-badge";
 
 import { OrderFilters } from "@/components/admin/order-filters";
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
@@ -96,15 +97,13 @@ export default async function AdminOrdersPage({
 
                     <td className="px-4 py-3">
                       <p className="text-xs">{methodLabel(order.payment?.method)}</p>
-                      <p
-                        className={
-                          order.payment?.status === "PAID"
-                            ? "mt-0.5 text-xs"
-                            : "mt-0.5 text-xs text-graphite"
-                        }
-                      >
-                        {paymentLabel(order.payment?.status)}
-                      </p>
+                      {order.payment && (
+                        <div className="mt-1">
+                          <PaymentStatusBadge
+                            status={order.payment.status as PaymentStatusKey}
+                          />
+                        </div>
+                      )}
                     </td>
 
                     <td className="px-4 py-3 text-right tabular-nums">
@@ -140,12 +139,6 @@ export default async function AdminOrdersPage({
 function methodLabel(method: string | undefined) {
   return PAYMENT_METHODS.find((m) => m.value === method)?.label ?? "—";
 }
-
-function paymentLabel(status: string | undefined) {
-  if (!status) return "—";
-  return PAYMENT_STATUS[status as PaymentStatusKey]?.label ?? status;
-}
-
 
 function Th({
   children,

@@ -6,9 +6,10 @@ import { CircleCheck, CreditCard } from "lucide-react";
 import { getOrderByNumber } from "@/lib/queries/order.query";
 import { Button } from "@/components/ui/button";
 import { formatDateTime, formatPrice } from "@/lib/utils";
-import { PAYMENT_METHODS } from "@/lib/constants";
+import { PAYMENT_METHODS, type PaymentStatusKey } from "@/lib/constants";
 
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
+import { PaymentStatusBadge } from "@/components/order/payment-status-badge";
 import { OrderTimeline } from "@/components/order/order-timeline";
 import { CancelOrderButton } from "@/components/order/cancel-order-button";
 
@@ -197,9 +198,14 @@ export default async function OrderPage({
 
           <InfoBlock title="Төлбөр">
             <p>{paymentLabel}</p>
-            <p className="text-graphite">
-              {order.payment?.status === "PAID" ? "Төлөгдсөн" : "Төлөгдөөгүй"}
-            </p>
+
+            {order.payment && (
+              <div className="mt-2">
+                <PaymentStatusBadge
+                  status={order.payment.status as PaymentStatusKey}
+                />
+              </div>
+            )}
 
             {order.payment?.transactionId && (
               <p className="text-graphite">

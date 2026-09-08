@@ -11,6 +11,7 @@ import { OrderStatusBadge } from "@/components/order/order-status-badge";
 import { OrderTimeline } from "@/components/order/order-timeline";
 import { OrderStatusActions } from "@/components/admin/order-status-actions";
 import { PaymentStatusSelect } from "@/components/admin/payment-status-select";
+import { PaymentStatusBadge } from "@/components/order/payment-status-badge";
 
 export async function generateMetadata({
   params,
@@ -192,6 +193,16 @@ export default async function AdminOrderPage({
             <h2 className="label border-b border-line pb-3">Төлбөр</h2>
 
             <div className="mt-4 space-y-3 text-sm">
+              {/* Одоогийн төлөв — хамгийн эхэнд, өнгөөр нь ялгаатай */}
+              {order.payment && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-graphite">Төлбөр</span>
+                  <PaymentStatusBadge
+                    status={order.payment.status as PaymentStatusKey}
+                  />
+                </div>
+              )}
+
               <div className="flex justify-between gap-3">
                 <span className="text-graphite">Арга</span>
                 <span>{paymentMethod}</span>
@@ -225,7 +236,7 @@ export default async function AdminOrderPage({
 
               {order.payment && (
                 <div className="pt-2">
-                  <p className="label mb-2 text-graphite">Төлөв</p>
+                  <p className="label mb-2 text-graphite">Төлөв солих</p>
                   <PaymentStatusSelect
                     orderNumber={order.orderNumber}
                     status={order.payment.status as PaymentStatusKey}
