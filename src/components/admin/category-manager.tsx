@@ -36,6 +36,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { SingleImageUploader } from "@/components/admin/single-image-uploader";
 import { slugify } from "@/lib/utils";
 import { categorySchema, type CategoryInput } from "@/schemas/product.schema";
 import {
@@ -153,6 +154,22 @@ function CategoryRowView({
     <div
       className={`flex flex-wrap items-center gap-3 px-4 py-3 ${nested ? "pl-10" : ""}`}
     >
+      {/*
+        Жижиг урьдчилан харах. Зураггүй ангилал нүүр хуудсан дээр
+        хоосон саарал нүх болж харагддаг тул алийг нь бөглөх ёстойг
+        админ жагсаалтаас шууд харна.
+      */}
+      <div className="relative aspect-4/5 w-9 shrink-0 overflow-hidden border border-line bg-sand">
+        {category.image && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={category.image}
+            alt=""
+            className="size-full object-cover"
+          />
+        )}
+      </div>
+
       <div className="min-w-0 flex-1">
         <p className="text-sm">
           {category.name}
@@ -372,18 +389,26 @@ function CategoryFormDialog({
               name="image"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="label text-graphite">
-                    Зургийн хаяг
-                  </FormLabel>
+                  <FormLabel className="label text-graphite">Зураг</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="https://..."
-                      {...field}
-                      value={field.value ?? ""}
+                    {/*
+                      Өмнө нь энд зөвхөн хаяг бичих талбар байсан —
+                      админ зургаа хаа нэгтээ байршуулаад хаягийг нь
+                      хуулж авчрах шаардлагатай байв. Одоо компьютерээсээ
+                      шууд сонгоно.
+
+                      Zod-д `image` нь хоосон мөр эсвэл хаяг. Талбар
+                      цэвэрлэгдэхэд `null` ирдэг тул хоосон мөр рүү
+                      хөрвүүлж, маягтын утга тогтвортой байлгана.
+                    */}
+                    <SingleImageUploader
+                      value={field.value || null}
+                      onChange={(url) => field.onChange(url ?? "")}
                     />
                   </FormControl>
                   <FormDescription>
-                    Нүүр хуудасны ангиллын хэсэгт харагдана.
+                    Нүүр хуудасны ангиллын хэсэгт харагдана. Босоо
+                    (4:5) зураг хамгийн тохиромжтой.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
