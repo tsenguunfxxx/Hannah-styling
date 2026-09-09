@@ -92,7 +92,20 @@ export async function issueResetCode(
   // 3. Илгээнэ
   const result =
     channel === "EMAIL"
-      ? await sendEmail(identifier, "HANNAH — Нууц үг сэргээх код", buildEmailHtml(code))
+      ? await sendEmail(
+          identifier,
+          /*
+            Гарчигт "HANNAH —" гэсэн угтвар байсныг ХАССАН.
+
+            Хоёр шалтгаан:
+              1. Илгээгчийн нэр (Hannah Mongolia) хажууд нь аль хэдийн
+                 харагддаг тул гарчиг дээр дахин бичих нь илүүц.
+              2. Брэндийн нэр + зураас гэсэн хэлбэр нь сурталчилгааны
+                 захидлын хэв маягтай ижил — spam шүүлтүүрт таагүй.
+          */
+          "Нууц үг сэргээх код",
+          buildEmailHtml(code),
+        )
       : await sendSms(
           identifier,
           `HANNAH: Нууц үг сэргээх код ${code}. ${CODE_TTL_MINUTES} минут хүчинтэй.`,

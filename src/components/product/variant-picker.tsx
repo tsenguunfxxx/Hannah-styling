@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition, type ReactNode } from "react";
+import { useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ShoppingBag } from "lucide-react";
+import { AlertCircle, Loader2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,17 @@ export function VariantPicker({
   const [size, setSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
 
+  /*
+    "Размераа сонгоно уу" гэдгийг ЗӨВХӨН toast-аар мэдэгддэг байсан.
+    Гар утсан дээр тэр мэдэгдэл дэлгэцийн доод буланд, товч дарж
+    буй хурууны доор гарч ирдэг тул үзэгдэлгүй өнгөрдөг байв.
+
+    Одоо размерын товчнуудын ЯГ доор улаанаар бичигдэж, тэр хэсэг
+    рүү дэлгэц автоматаар гүйнэ.
+  */
+  const [sizeMissing, setSizeMissing] = useState(false);
+  const sizeRef = useRef<HTMLFieldSetElement>(null);
+
   const selected = findVariant(variants, color, size);
   const totalStock = getTotalStock(variants);
   const isSoldOut = totalStock === 0;
@@ -87,6 +98,7 @@ export function VariantPicker({
 
   function handleSizeChange(next: string) {
     setSize(next);
+    setSizeMissing(false);
 
     // Тухайн размерын үлдэгдлээс хэтэрсэн бол тоог буулгана
     const variant = findVariant(variants, color, next);
@@ -95,6 +107,11 @@ export function VariantPicker({
 
   function handleAdd(thenCheckout: boolean) {
     if (!selected) {
+      setSizeMissing(true);
+
+      // Товч нь размерын хэсгээс доор байдаг тул буцааж дээш нь харуулна
+      sizeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+
       toast.error(color ? "Размераа сонгоно уу." : "Өнгө, размераа сонгоно уу.");
       return;
     }
@@ -173,7 +190,7 @@ export function VariantPicker({
       </fieldset>
 
       {/* РАЗМЕР */}
-      <fieldset className="mt-8">
+      <fieldset ref={sizeRef} className="mt-8 scroll-mt-24">
         <legend className="label flex w-full items-center justify-between gap-4 text-graphite">
           <span>
             Размер{size && <span className="ml-2 text-ink">{size}</span>}
@@ -214,8 +231,23 @@ export function VariantPicker({
         {isSoldOut ? (
           <span className="label bg-ink px-2 py-1 text-bone">Дууссан</span>
         ) : !selected ? (
-          <span className="text-graphite">
-            Үлдэгдлийг харахын тулд размераа сонгоно уу.
+          /*
+            Размер сонгоогүй үед хоёр байдал:
+              энгийн  — саарал зөвлөмж
+              алдаа   — сагсанд нэмэх гэж оролдсон. Улаан, тод, дүрстэй.
+          */
+          <span
+            className={cn(
+              "inline-flex items-center gap-2",
+              sizeMissing ? "font-medium text-sale" : "text-graphite",
+            )}
+          >
+            {sizeMissing && (
+              <AlertCircle className="size-4 shrink-0" strokeWidth={2} />
+            )}
+            {sizeMissing
+              ? "Размераа сонгоно уу."
+              : "Үлдэгдлийг харахын тулд размераа сонгоно уу."}
           </span>
         ) : selected.stock <= LOW_STOCK_THRESHOLD ? (
           <span className="text-sale">
