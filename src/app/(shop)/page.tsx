@@ -8,7 +8,6 @@ import { getWishlistProductIds } from "@/actions/wishlist.action";
 
 import { Hero } from "@/components/home/hero";
 import { CategoryGrid } from "@/components/home/category-grid";
-import { Gallery } from "@/components/home/gallery";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeader } from "@/components/shared/section-header";
 
@@ -74,8 +73,6 @@ export default async function HomePage() {
           <ProductGrid products={saleProducts} wishlistIds={wishlistIds} />
         </section>
       )}
-
-      <Gallery />
     </>
   );
 }

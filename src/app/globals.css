@@ -167,35 +167,3 @@
   padding-inline: 1.25rem;
   @media (width >= 48rem) { padding-inline: 2.5rem; }
 }
-
-/*
-  Хажуу тийш тасралтгүй гүйх зурвас (marquee).
-
-  Хэрхэн ажилладаг вэ:
-    Дотор нь ижил хоёр жагсаалт байрлуулна. Зурвасыг зүүн тийш
-    яг ТАЛААР нь (-50%) шилжүүлэхэд хоёр дахь жагсаалт эхнийхийнхээ
-    байрлалд яг таарч ирнэ. Тиймээс давталт эхлэхэд үсрэлт мэдэгдэхгүй,
-    төгсгөлгүй гүйж байгаа мэт харагдана.
-
-  Зайг `gap` биш `margin-right`-ээр өгсөн нь чухал —
-  gap ашиглавал -50% нь яг таарахгүй, зураг аажмаар гулсана.
-*/
-@keyframes marquee-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
-@utility marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee-scroll 80s linear infinite;
-}
-
-
-/*
-  Хөдөлгөөн нь толгой эргүүлдэг хүмүүс үйлдлийн системдээ
-  "хөдөлгөөн багасгах" тохиргоог асаадаг. Түүнийг хүндэтгэнэ.
-*/
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; }
-}
