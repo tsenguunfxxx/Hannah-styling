@@ -60,7 +60,7 @@ export default async function CartPage() {
         </div>
 
         {/* Хураангуй — гүйлгэхэд наалдаж үлдэнэ */}
-        <aside className="lg:sticky lg:top-24 lg:h-fit">
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:h-fit">
           <CartSummary
             totals={cart.totals}
             coupon={cart.coupon}

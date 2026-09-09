@@ -141,7 +141,7 @@ export default async function AdminOrderPage({
         </div>
 
         {/* Хажуугийн мэдээлэл */}
-        <aside className="space-y-8">
+        <aside className="min-w-0 space-y-8">
           {/*
             Хүргэлтийн мэдээллийг ТОМООР, тодоор. Хүргэгч энэ хэсгийг
             уншиж ажилладаг тул бусад тайлбар шиг бүдэг байх ёсгүй.

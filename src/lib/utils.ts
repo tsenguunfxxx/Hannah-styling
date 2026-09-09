@@ -1,5 +1,29 @@
 import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { extendTailwindMerge } from "tailwind-merge"
+
+/**
+ * Ангиудыг нэгтгэгч.
+ *
+ * `twMerge` нь зөрчилдөх ангиудаас СҮҮЛИЙНХИЙГ нь үлдээдэг —
+ * жишээ нь `cn("p-2", "p-4")` → `p-4`. Гэвч тэр зөвхөн Tailwind-ийн
+ * СТАНДАРТ ангиудыг мэднэ.
+ *
+ * Бидний `label` бол өөрсдийн бичсэн utility (globals.css) бөгөөд
+ * үсгийн хэмжээг 11px болгодог. twMerge түүнийг танихгүй тул
+ * `cn("text-sm", "label")` хоёуланг нь үлдээж, CSS-ийн дараалалаар
+ * `text-sm` (14px) ялж байв. Үр дүнд `label` бүхий БҮХ товч
+ * зориулснаас 27% том гарч, гар утсан дээр багтахгүй болж байлаа.
+ *
+ * Тиймээс `label`-ыг "үсгийн хэмжээ"-ний бүлэгт бүртгэж өгнө —
+ * ингэснээр `text-sm`-тэй зөрчилдөж байгааг twMerge ойлгоно.
+ */
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      "font-size": ["label"],
+    },
+  },
+})
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

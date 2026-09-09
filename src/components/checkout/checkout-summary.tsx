@@ -59,7 +59,8 @@ export function CheckoutSummary({
                 </p>
               </div>
 
-              <p className="text-sm tabular-nums">
+              {/* `shrink-0` — үнэ хэзээ ч шахагдаж таслагдахгүй */}
+              <p className="shrink-0 text-sm tabular-nums">
                 {formatPrice(item.lineTotal)}
               </p>
             </li>

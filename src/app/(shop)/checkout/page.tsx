@@ -72,7 +72,14 @@ export default async function CheckoutPage() {
           />
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:h-fit lg:order-last">
+        {/*
+          `min-w-0` — grid баганын өргөнийг агуулга нь ТУЛГАЖ
+          тэлэхээс сэргийлнэ. Үүнгүй бол урт барааны нэр багануудыг
+          дэлгэц дээр багтахааргүй өргөн болгож, ХУУДАС БҮХЭЛДЭЭ
+          хажуу тийш гүйдэг байлаа. Зүүн багана нь аль хэдийн
+          ийм хамгаалалттай байсан — энд ч мөн адил хэрэгтэй.
+        */}
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:h-fit lg:order-last">
           <CheckoutSummary
             items={cart.items}
             totals={cart.totals}

@@ -248,13 +248,28 @@ export function CheckoutForm({
           </div>
         </section>
 
+        {/*
+          Товчны бичиг УРТ (үйлдэл + дүн), `label` нь үсэг хооронд
+          өргөн зай тавьдаг тул нарийн дэлгэц дээр нэг мөрөнд
+          багтахгүй байв. Багтаагүй бичиг товчноос халин гараад
+          БҮХ хуудсыг хажуу тийш сунгаж байсан.
+
+          Шийдэл:
+            whitespace-normal + flex-wrap — багтахгүй бол хоёр мөр
+              болж БУУНА, хуудас сунахгүй
+            хэсэг тус бүрд whitespace-nowrap — үг дундуураа тасрахгүй
+            h-auto min-h-14 — хоёр мөр болоход товч өндөрсөнө
+        */}
         <Button
           type="submit"
           disabled={isPending}
-          className="label h-14 w-full"
+          className="label h-auto min-h-14 w-full flex-wrap gap-x-2.5 gap-y-1 px-5 py-4 whitespace-normal"
         >
           {isPending && <Loader2 className="size-4 animate-spin" />}
-          {formatPrice(total)} — Захиалга баталгаажуулах
+          <span className="whitespace-nowrap">Захиалга баталгаажуулах</span>
+          <span className="whitespace-nowrap tabular-nums">
+            {formatPrice(total)}
+          </span>
         </Button>
       </form>
     </Form>

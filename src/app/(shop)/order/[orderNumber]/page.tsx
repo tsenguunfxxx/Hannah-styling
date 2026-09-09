@@ -183,7 +183,7 @@ export default async function OrderPage({
         </div>
 
         {/* Мэдээлэл */}
-        <aside className="space-y-8">
+        <aside className="min-w-0 space-y-8">
           <InfoBlock title="Хүргэлтийн хаяг">
             <p>{order.customerName}</p>
             <p>{order.phone}</p>
