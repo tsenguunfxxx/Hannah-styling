@@ -59,7 +59,7 @@ export async function registerAction(values: unknown): Promise<ActionState> {
     return { success: false, error: "Энэ имэйл хаягаар бүртгэл аль хэдийн үүссэн байна." };
   }
 
-  // Утсаар нэвтрэх боломжтой тул дугаар нь ч давхардаж болохгүй
+  // Нууц үг сэргээх код утсаар ч очдог тул дугаар давхардаж болохгүй
   if (phone) {
     const phoneTaken = await prisma.user.findUnique({ where: { phone } });
 

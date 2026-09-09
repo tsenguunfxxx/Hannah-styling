@@ -23,16 +23,18 @@ import { loginAction } from "@/actions/auth.action";
 /**
  * Нэвтрэх маягт.
  *
- * УТАС эсвэл ИМЭЙЛ хоёрын аль нэгээр нэвтэрнэ.
- * Монголд утсаар нэвтрэх нь илүү түгээмэл тул анхдагчаар утас.
+ * ЗӨВХӨН ИМЭЙЛЭЭР нэвтэрнэ.
  *
- * Хоёр горим нэг л талбар ашиглана (`identifier`) — сервер нь
- * "@" тэмдэг байгаа эсэхээр аль нь болохыг таньдаг.
+ * Өмнө нь "утас / имэйл" гэсэн хоёр горимтой байсныг хассан.
+ * Бүртгэлд имэйл ЗААВАЛ шаарддаг (утас нь сонголт) тул хүн бүр
+ * имэйлтэй — харин утасгүй хүн утсаар нэвтэрч чаддаггүй байлаа.
+ * Нэг л зам үлдээх нь хэрэглэгчид ойлгомжтой, кодод ч цэвэрхэн.
+ *
+ * Талбарын нэр `identifier` хэвээр — Auth.js провайдер болон
+ * бүртгэлийн дараах автомат нэвтрэлт үүнийг ашигладаг.
  */
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const [isPending, startTransition] = useTransition();
-
-  const [mode, setMode] = useState<"phone" | "email">("phone");
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginInput>({
@@ -51,15 +53,6 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     });
   }
 
-  /** Горим солиход өмнөх утга үлдвэл эргэлзээ төрүүлнэ — цэвэрлэнэ */
-  function switchMode() {
-    setMode((current) => (current === "phone" ? "email" : "phone"));
-    form.setValue("identifier", "");
-    form.clearErrors("identifier");
-  }
-
-  const isPhone = mode === "phone";
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -68,47 +61,16 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           name="identifier"
           render={({ field }) => (
             <FormItem>
-              {/* Шошго зүүнд, горим солих холбоос баруунд */}
-              <div className="flex items-baseline justify-between gap-4">
-                <FormLabel className="text-sm font-normal text-ink">
-                  {isPhone ? "Утасны дугаар" : "Имэйл"}
-                </FormLabel>
-
-                <button
-                  type="button"
-                  onClick={switchMode}
-                  className="text-sm text-ink underline underline-offset-4 transition-opacity hover:opacity-70"
-                >
-                  {isPhone ? "Имэйл ашиглах" : "Утсаар нэвтрэх"}
-                </button>
-              </div>
+              <FormLabel className="text-sm font-normal text-ink">Имэйл</FormLabel>
 
               <FormControl>
-                {isPhone ? (
-                  <div className="flex">
-                    {/* Улсын код — зөвхөн харуулна, засах шаардлагагүй */}
-                    <span className="grid shrink-0 place-items-center rounded-l-[10px] border border-r-0 border-line bg-white px-4 text-sm text-graphite">
-                      +976
-                    </span>
-                    <Input
-                      type="tel"
-                      inputMode="numeric"
-                      maxLength={8}
-                      placeholder="99112233"
-                      autoComplete="tel-national"
-                      className="h-12 rounded-l-none rounded-r-[10px] bg-white text-base"
-                      {...field}
-                    />
-                  </div>
-                ) : (
-                  <Input
-                    type="email"
-                    placeholder="name@example.com"
-                    autoComplete="email"
-                    className="h-12 rounded-[10px] bg-white text-base"
-                    {...field}
-                  />
-                )}
+                <Input
+                  type="email"
+                  placeholder="name@example.com"
+                  autoComplete="email"
+                  className="h-12 rounded-[10px] bg-white text-base"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -152,7 +114,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           )}
         />
 
-        <p className="flex items-center justify-end gap-2 text-sm text-graphite">
+        <p className="flex flex-wrap items-center justify-end gap-x-2 text-sm text-graphite">
           Нууц үгээ мартсан уу?
           <Link
             href="/forgot-password"

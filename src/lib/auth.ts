@@ -32,7 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        identifier: { label: "Утас эсвэл имэйл", type: "text" },
+        identifier: { label: "Имэйл", type: "text" },
         password: { label: "Нууц үг", type: "password" },
       },
 
@@ -45,17 +45,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         /*
-          Утас, имэйл хоёрын аль нэгээр хайна.
-          "@" тэмдэг агуулж байвал имэйл, үгүй бол утасны дугаар.
-          Хоёр талбар хоёулаа @unique тул үр дүн ганц байна.
+          Зөвхөн ИМЭЙЛЭЭР хайна. Утсаар нэвтрэх боломжийг хассан —
+          `loginSchema` дээр имэйл эсэхийг аль хэдийн шалгасан тул
+          энд өөр хувилбар шаардлагагүй.
+
+          Имэйлийг ЖИЖИГ үсэг рүү буулгана: бүртгэх үед мөн адил
+          хийдэг тул "Name@Mail.com" ч таарна.
         */
         const { identifier } = parsed.data;
 
-        const user = identifier.includes("@")
-          ? await prisma.user.findUnique({
-              where: { email: identifier.toLowerCase() },
-            })
-          : await prisma.user.findUnique({ where: { phone: identifier } });
+        const user = await prisma.user.findUnique({
+          where: { email: identifier.toLowerCase() },
+        });
 
         // Хэрэглэгч байхгүй, эсвэл зөвхөн Google-ээр бүртгүүлсэн (password хоосон)
         if (!user?.password) return null;
