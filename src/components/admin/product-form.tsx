@@ -176,21 +176,20 @@ export function ProductForm({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-2">
-                  <FormLabel className="label text-graphite">
-                    Богино тайлбар
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea rows={2} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/*
+              "Богино тайлбар" талбарыг ХАССАН.
+
+              Тэр бичиг дэлгүүрийн хуудсан дээр хаана ч харагддаггүй
+              байсан — зөвхөн хайлтын системд зориулсан тайлбар байв.
+              Админаас нэг ч удаа харагдахгүй зүйлийг бөглөх нь
+              илүүц тул авч хаяв.
+
+              Талбарыг л хассан болохоос ӨГӨГДЛИЙГ устгаагүй: хуучин
+              бараануудын тайлбар байрандаа үлдэж, засварлахад
+              (`defaultValues`) хамт дамжсаар байна. Шинэ бараанд
+              хоосон үлдэх бөгөөд хайлтын тайлбарыг "Дэлгэрэнгүй"
+              хэсгээс авна — доорх product/[slug]/page.tsx-г үзнэ үү.
+            */}
 
             <FormField
               control={form.control}

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberField } from "@/components/admin/number-field";
 import { compareSizes } from "@/lib/variant-utils";
 import { KIDS_SIZES, LETTER_SIZES } from "@/lib/constants";
 import type { ProductVariantInput } from "@/schemas/product.schema";
@@ -285,13 +286,10 @@ export function VariantEditor({
                     </td>
 
                     <td className="px-3 py-2">
-                      <Input
-                        type="number"
-                        min={0}
+                      <NumberField
                         value={variant.stock}
-                        onChange={(e) =>
-                          update(index, { stock: Number(e.target.value) })
-                        }
+                        onChange={(stock) => update(index, { stock: stock ?? 0 })}
+                        aria-label={`${variant.color} ${variant.size} үлдэгдэл`}
                         className="h-8 w-24"
                       />
                     </td>
@@ -306,16 +304,12 @@ export function VariantEditor({
                     </td>
 
                     <td className="px-3 py-2">
-                      <Input
-                        type="number"
-                        min={0}
-                        value={variant.price ?? ""}
-                        onChange={(e) =>
-                          update(index, {
-                            // Хоосон бол барааны үндсэн үнийг ашиглана
-                            price: e.target.value ? Number(e.target.value) : null,
-                          })
-                        }
+                      <NumberField
+                        // Хоосон бол барааны үндсэн үнийг ашиглана
+                        nullable
+                        value={variant.price}
+                        onChange={(price) => update(index, { price })}
+                        aria-label={`${variant.color} ${variant.size} үнэ`}
                         placeholder="Үндсэн үнэ"
                         className="h-8 w-32"
                       />

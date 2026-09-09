@@ -36,6 +36,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { NumberField } from "@/components/admin/number-field";
 import { SingleImageUploader } from "@/components/admin/single-image-uploader";
 import { slugify } from "@/lib/utils";
 import { categorySchema, type CategoryInput } from "@/schemas/product.schema";
@@ -423,13 +424,11 @@ function CategoryFormDialog({
                   <FormItem className="w-32">
                     <FormLabel className="label text-graphite">Эрэмбэ</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min={0}
+                      <NumberField
                         value={field.value}
-                        onChange={(event) =>
-                          field.onChange(Number(event.target.value) || 0)
-                        }
+                        onChange={(sortOrder) => field.onChange(sortOrder ?? 0)}
+                        onBlur={field.onBlur}
+                        name={field.name}
                       />
                     </FormControl>
                     <FormMessage />

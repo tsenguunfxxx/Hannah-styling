@@ -34,12 +34,28 @@ export async function generateMetadata({
 
   if (!product) return { title: "Бараа олдсонгүй" };
 
+  /*
+    Google-ийн хайлтын үр дүнд гарах тайлбар.
+
+    Админаас "Богино тайлбар" талбарыг хассан тул шинэ бараанд тэр
+    бичиг хоосон ирнэ. Хоосон үлдвэл хайлтад бараа маань тайлбаргүй
+    харагдана — тиймээс ГУРВАН аргаар дараалан хайна:
+
+      1. Богино тайлбар — хуучин бараанууд дээр байгаа
+      2. Дэлгэрэнгүй   — админ энэ талбарыг бөглөсөөр байгаа
+      3. Барааны нэр   — хамгийн муудаа ч гэсэн утга агуулсан өгүүлбэр
+  */
+  const summary =
+    product.description.trim() ||
+    product.details?.trim() ||
+    `${product.name} — ${SITE.name} дэлгүүрээс.`;
+
   return {
     title: product.name,
-    description: product.description.slice(0, 160),
+    description: summary.slice(0, 160),
     openGraph: {
       title: `${product.name} | ${SITE.name}`,
-      description: product.description.slice(0, 160),
+      description: summary.slice(0, 160),
       images: product.images[0] ? [{ url: product.images[0].url }] : [],
     },
   };

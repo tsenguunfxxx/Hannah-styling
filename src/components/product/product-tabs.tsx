@@ -63,8 +63,19 @@ export function ProductTabs({
 
       {details && (
         <TabsContent value="details" className="pt-8">
-          {/* Саарал биш бараан өнгө — барааны мэдээлэл тул тод байх ёстой */}
-          <p className="max-w-prose text-[15px] leading-relaxed whitespace-pre-line text-ink">
+          {/*
+            Барааны дэлгэрэнгүй нь ХУДАЛДАН АВАХ шийдвэрт хамгийн их
+            нөлөөлдөг бичиг — материал, арчилгаа, онцлог. Тиймээс
+            жирийн текст биш, гарчиг шиг тод харагдана:
+
+              text-ink       — хамгийн бараан өнгө (#111110)
+              font-medium    — үсгийн зузаан нэмэгдсэн
+              text-base/lg   — хуудасны бусад текстээс томхон
+
+            Өнгө нь аль хэдийн боломжит хамгийн бараан нь тул
+            цаашид тодруулах ганц зам бол хэмжээ, зузаан.
+          */}
+          <p className="max-w-prose text-base leading-relaxed font-medium whitespace-pre-line text-ink sm:text-lg">
             {details}
           </p>
         </TabsContent>

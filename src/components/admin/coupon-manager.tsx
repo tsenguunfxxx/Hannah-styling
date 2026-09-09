@@ -9,6 +9,7 @@ import { ChevronDown, Loader2, Plus, Power, SquarePen, Trash2 } from "lucide-rea
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberField } from "@/components/admin/number-field";
 import {
   Dialog,
   DialogContent,
@@ -416,8 +417,8 @@ function SelectBox({
 }
 
 /**
- * Тоон талбар.
- * type="number" үргэлж ТЕКСТ буцаадаг тул Number() рүү хөрвүүлнэ.
+ * Тоон талбар — хуваалцсан `NumberField`-ийг маягтын талбарт залгана.
+ * Гараар бичихэд хэрхэн саадгүй болгосныг тэндээс уншина уу.
  */
 function NumberInput({
   field,
@@ -434,21 +435,14 @@ function NumberInput({
   nullable?: boolean;
 }) {
   return (
-    <Input
-      type="number"
+    <NumberField
       min={min}
       name={field.name}
+      value={field.value}
+      nullable={nullable}
+      onChange={field.onChange}
       onBlur={field.onBlur}
-      value={field.value ?? ""}
       placeholder={nullable ? "Хязгааргүй" : undefined}
-      onChange={(event) => {
-        const raw = event.target.value;
-        if (raw === "") {
-          field.onChange(nullable ? null : 0);
-          return;
-        }
-        field.onChange(Number(raw));
-      }}
     />
   );
 }
