@@ -87,9 +87,17 @@ export default async function ProductPage({
   return (
     <div className="container-shop py-8 lg:py-12">
       {/* Замын мөр */}
+      {/*
+        ХУУДАС НЭЭГДЭХ ХӨДӨЛГӨӨН.
+
+        Гурван хэсэг дараалан гарч ирнэ: замын мөр → зураг → мэдээлэл.
+        Нүд эхлээд зураг дээр буудаг тул түүнийг голд нь тавьсан.
+
+        Хоцролт нийт 200мс — үүнээс урт бол хүн хүлээж эхэлнэ.
+      */}
       <nav
         aria-label="Замын мөр"
-        className="label mb-8 flex flex-wrap items-center gap-2 text-graphite"
+        className="reveal-up label mb-8 flex flex-wrap items-center gap-2 text-graphite"
       >
         <Link href="/" className="transition-colors hover:text-ink">
           Нүүр
@@ -106,10 +114,20 @@ export default async function ProductPage({
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-        <ProductGallery images={product.images} productName={product.name} />
+        <ProductGallery
+          images={product.images}
+          productName={product.name}
+          className="reveal-up [animation-delay:80ms]"
+        />
 
-        {/* Мэдээлэл — desktop дээр гүйлгэхэд наалдаж үлдэнэ */}
-        <div className="min-w-0 lg:sticky lg:top-24 lg:h-fit lg:self-start">
+        {/*
+          Мэдээлэл — desktop дээр гүйлгэхэд наалдаж үлдэнэ.
+
+          Энд `reveal-up` биш `fade-in` ашигласан нь санаатай: тэр нь
+          `transform`-той бөгөөд `position: sticky` элемент дээр
+          наалдах зан эвдэрч болзошгүй. Зөвхөн ил тод нь өөрчлөгдөнө.
+        */}
+        <div className="fade-in min-w-0 [animation-delay:200ms] lg:sticky lg:top-24 lg:h-fit lg:self-start">
           <p className="label text-graphite">{product.category.name}</p>
 
           <h1 className="mt-3 font-display text-2xl font-medium uppercase tracking-label sm:text-3xl">

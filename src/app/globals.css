@@ -239,9 +239,20 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/*
+  Товчилсон `animation:` бичиглэл ашиглаагүй нь САНААТАЙ.
+
+  Товчилсон хэлбэр нь бичигдээгүй бүх дэд шинжийг анхдагч руу нь
+  БУЦААДАГ — тэр дотор `animation-delay` ч бий. Тиймээс гаднаас
+  `[animation-delay:80ms]` гэж нэмэхэд CSS-ийн дараалалаас болж
+  тэр нь 0 болж дардаг байв. Задалж бичихэд хоцролт хэвээр үлдэнэ.
+*/
 @utility reveal-up {
   opacity: 0;
-  animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-name: reveal-up;
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: forwards;
 }
 
 /*
@@ -252,6 +263,107 @@
 @media (prefers-reduced-motion: reduce) {
   .reveal-up {
     opacity: 1;
+    animation: none;
+  }
+}
+
+/*
+  Зөвхөн бүдгээс тод — БАЙРЛАЛ хөдлөхгүй.
+
+  `position: sticky` элемент дээр `transform` хэрэглэхээс зайлсхийв:
+  наалдах зан нь зарим хөтөч дээр эвдэрдэг. Тиймээс барааны
+  дэлгэрэнгүй багана шиг наалддаг хэсэгт зөвхөн ил тодыг нь өөрчилнө.
+*/
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@utility fade-in {
+  opacity: 0;
+  animation-name: fade-in;
+  animation-duration: 0.55s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+/*
+  Зүрх дарахад "цохилно".
+
+  Дунд нь 1-ээс ДООШ (0.88) буулгасан нь чухал — шууд томроод буухаас
+  илүү, эхлээд бага зэрэг шахагдаад дараа нь дэлбэрэх нь бодит
+  цохилтын мэдрэмж төрүүлнэ.
+*/
+@keyframes heart-pop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.88); }
+  60%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+@utility heart-pop {
+  animation: heart-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    opacity: 1;
+    animation: none;
+  }
+
+  .heart-pop {
+    animation: none;
+  }
+}
+
+/*
+  Захиалга баталгаажсаны тэмдэг — цагираг эргэн зурагдаж, дараа нь
+  дотор нь чагт татагдана.
+
+  Цагаригийн урт нь тойргийн урт: 2 × π × 10 ≈ 62.8. Чагтных
+  (m9 12 2 2 4-4) нь √8 + √32 ≈ 8.5. Тус бүрд нь өөрийн урт
+  хэрэгтэй тул хоёр тусдаа utility болгов.
+
+  Чагт нь цагаригийг зурж дуусах үед (0.4с) эхэлнэ — хоёулаа зэрэг
+  хөдөлвөл юу ч ялгарахгүй.
+*/
+@keyframes ring-draw {
+  from { stroke-dashoffset: 63; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@utility ring-draw {
+  stroke-dasharray: 63;
+  animation-name: ring-draw;
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes tick-draw {
+  from { stroke-dashoffset: 10; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@utility tick-draw {
+  stroke-dasharray: 10;
+  stroke-dashoffset: 10;
+  animation-name: tick-draw;
+  animation-duration: 0.3s;
+  animation-delay: 0.4s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: forwards;
+}
+
+/*
+  Хөдөлгөөн багасгах үед зураас бүрэн харагдах ёстой. `animation: none`
+  дангаараа хангалтгүй — тасалгаа нь үлдэж, тэмдэг алга болно.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .ring-draw,
+  .tick-draw {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
     animation: none;
   }
 }

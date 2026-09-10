@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,10 +23,36 @@ export function WishlistButton({
   const [isPending, startTransition] = useTransition();
   const [active, setActive] = useOptimistic(initialActive);
 
+  /*
+    Дарах бүрд зүрх нэг удаа "цохилно".
+
+    Зөвхөн `active`-аас хамааруулж болохгүй байсан: хүслийн
+    жагсаалтад аль хэдийн байгаа бараанууд хуудас ачаалагдах бүрд
+    цохилж, дэлгүүр бүхэлдээ жиргэх байв. Тиймээс ХЭРЭГЛЭГЧ дарсан
+    үед л асаана.
+  */
+  const [bump, setBump] = useState(false);
+  const bumpTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (bumpTimer.current) clearTimeout(bumpTimer.current);
+    };
+  }, []);
+
   function handleClick(event: React.MouseEvent) {
     // Карт бүхэлдээ линк тул дотор нь дарахад хуудас солигдохоос сэргийлнэ
     event.preventDefault();
     event.stopPropagation();
+
+    // Хөдөлгөөнийг эхнээс нь дахин эхлүүлэхийн тулд эхлээд унтраана
+    setBump(false);
+    if (bumpTimer.current) clearTimeout(bumpTimer.current);
+
+    requestAnimationFrame(() => {
+      setBump(true);
+      bumpTimer.current = setTimeout(() => setBump(false), 450);
+    });
 
     startTransition(async () => {
       setActive(!active);
@@ -54,7 +80,11 @@ export function WishlistButton({
       )}
     >
       <Heart
-        className={cn("size-4 transition-all", active && "fill-ink stroke-ink")}
+        className={cn(
+          "size-4 transition-all",
+          active && "fill-ink stroke-ink",
+          bump && "heart-pop",
+        )}
       />
     </button>
   );

@@ -21,15 +21,23 @@ export type GalleryImage = {
 export function ProductGallery({
   images,
   productName,
+  className,
 }: {
   images: GalleryImage[];
   productName: string;
+  /** Гаднаас нэмэх ангиуд — хуудас нээгдэх хөдөлгөөнд ашиглана */
+  className?: string;
 }) {
   const [active, setActive] = useState(0);
 
   if (images.length === 0) {
     return (
-      <div className="label grid aspect-3/4 place-items-center bg-sand text-graphite">
+      <div
+        className={cn(
+          "label grid aspect-3/4 place-items-center bg-sand text-graphite",
+          className,
+        )}
+      >
         Зураг байхгүй
       </div>
     );
@@ -42,7 +50,7 @@ export function ProductGallery({
   const current = images[active];
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:gap-4">
+    <div className={cn("flex min-w-0 flex-col gap-3 lg:flex-row lg:gap-4", className)}>
       {/* Жижиг зургууд */}
       {images.length > 1 && (
         <div className="order-2 flex gap-3 overflow-x-auto lg:order-1 lg:w-20 lg:shrink-0 lg:flex-col lg:overflow-visible">

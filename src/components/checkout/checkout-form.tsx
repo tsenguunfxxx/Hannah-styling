@@ -41,6 +41,19 @@ export function CheckoutForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  /*
+    ⚠️ ЭНД ХҮЛЭЭЛТ ТАВЬЖ БОЛОХГҮЙ.
+
+    Товч дээр "Захиалга үүслээ" гэж хэсэг зогсоод дараа нь шилжүүлэх
+    гэж үзсэн. Гэвч захиалга үүсэхэд сагс хоосорч, checkout хуудас
+    өөрөө дахин ачаалагдаад "сагс хоосон" гэж үзэн /cart руу
+    ЯАРУУ шиднэ. Хүлээлт нэмэхэд тэр шидэлт түрүүлж, хэрэглэгч
+    захиалгаа огт харалгүй сагс руу унадаг байв.
+
+    Тиймээс энд шууд шилжинэ. Баяр хүргэх хөдөлгөөнийг захиалгын
+    хуудас дээр (`?new=1`) хийсэн — тэр ч бүр зөв газар.
+  */
+
   const form = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -76,7 +89,7 @@ export function CheckoutForm({
 
       toast.success("Захиалга амжилттай үүслээ.");
 
-      // Амжилтын хуудас руу. replace — буцах товчоор маягт руу эргэж орохгүй
+      // replace — буцах товчоор маягт руу эргэж орохгүй
       router.replace(`/order/${result.data.orderNumber}?new=1`);
     });
   }
@@ -265,7 +278,11 @@ export function CheckoutForm({
           disabled={isPending}
           className="label h-auto min-h-14 w-full flex-wrap gap-x-2.5 gap-y-1 px-5 py-4 whitespace-normal"
         >
-          {isPending && <Loader2 className="size-4 animate-spin" />}
+          {isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <CreditCard className="size-4" />
+          )}
           <span className="whitespace-nowrap">Захиалга баталгаажуулах</span>
           <span className="whitespace-nowrap tabular-nums">
             {formatPrice(total)}

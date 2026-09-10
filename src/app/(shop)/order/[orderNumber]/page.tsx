@@ -104,10 +104,31 @@ export default async function OrderPage({
         </div>
       )}
 
-      {/* Шинэ захиалга — зөвхөн ХАРААХАН төлөөгүй үед */}
+      {/*
+        Шинэ захиалга — зөвхөн ХАРААХАН төлөөгүй үед.
+
+        Дэлгүүрийн хамгийн чухал мөч тул тэмдэг нь өөрөө зурагдана:
+        эхлээд цагираг эргэж хаагдаад, дараа нь дотор нь чагт татагдана.
+        Хайрцаг өөрөө мөн зөөлөн мандаж гарч ирнэ.
+
+        `CircleCheck` дүрсийг гараар бичсэн svg-ээр сольсон нь үүнээс
+        болсон — бэлэн дүрсний зураасыг тусад нь хөдөлгөх боломжгүй.
+      */}
       {isNew && !isPaid && !paymentFailed && (
-        <div className="mb-10 flex items-start gap-3 border border-ink p-5">
-          <CircleCheck className="mt-0.5 size-5 shrink-0" />
+        <div className="reveal-up mb-10 flex items-start gap-3 border border-ink p-5">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+            className="mt-0.5 size-5 shrink-0"
+          >
+            <circle cx="12" cy="12" r="10" className="ring-draw" />
+            <path d="m9 12 2 2 4-4" className="tick-draw" />
+          </svg>
           <div>
             <p className="font-display text-lg uppercase tracking-label">
               Захиалга хүлээн авлаа
