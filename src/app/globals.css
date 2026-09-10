@@ -167,3 +167,91 @@
   padding-inline: 1.25rem;
   @media (width >= 48rem) { padding-inline: 2.5rem; }
 }
+
+/* ============================================================
+   Хөдөлгөөн
+   ============================================================ */
+
+/*
+  "Зурагдах" чагт — сагсанд нэмэгдсэнийг батлах тэмдэг.
+
+  Хэрхэн ажилладаг вэ?
+    `stroke-dasharray` нь зураасыг тасалгаатай болгодог. Тасалгааг
+    зураасны БҮТЭН уртаар өгвөл нэг л урт зураас, нэг л урт завсар
+    болно. Дараа нь `stroke-dashoffset`-оор завсрыг нь гүйлгэхэд
+    зураас аажмаар нээгдэж, гараар зурж байгаа мэт харагдана.
+
+  24 бол чагтны ойролцоо урт (15.6 + 7.1 ≈ 22.6) — бага зэрэг
+  илүүг нь өгсөн нь эхлэл нь бүрэн нуугдсан байхыг баталгаажуулна.
+*/
+@keyframes check-draw {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@utility check-draw {
+  stroke-dasharray: 24;
+  animation: check-draw 0.45s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+/* Товчны бичиг солигдоход зөөлхөн мэдэгдэнэ */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@utility rise-in {
+  animation: rise-in 0.35s ease-out;
+}
+
+/*
+  Хөдөлгөөн нь толгой эргүүлдэг хүмүүс үйлдлийн системдээ
+  "хөдөлгөөн багасгах" тохиргоог асаадаг. Түүнийг хүндэтгэнэ.
+
+  Чагтны хувьд `animation: none` дангаараа хангалтгүй — тасалгаа нь
+  хэвээр үлдэж, зураас огт харагдахгүй болно. Тиймээс dasharray-г
+  нь мөн цуцална.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .check-draw {
+    animation: none;
+    stroke-dasharray: none;
+  }
+
+  .rise-in {
+    animation: none;
+  }
+}
+
+/*
+  Жагсаалт "цуварч" гарч ирэх.
+
+  Карт бүр өмнөхөөсөө хэдхэн миллисекундын дараа гарч ирэхэд нүд
+  зүүн дээрээс баруун доош аяндаа гүйнэ — бүгд зэрэг цойлохоос
+  илүү тайван, үнэтэй харагдана.
+
+  `opacity: 0`-оор эхэлж, `forwards`-оор дуусгавар дээрээ үлдэнэ.
+  Эхлэлийн 0 нь чухал: JavaScript ачаалагдахаас өмнө ч карт
+  нуугдсан байж, дараа нь зөөлөн гарч ирнэ.
+*/
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@utility reveal-up {
+  opacity: 0;
+  animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/*
+  Хөдөлгөөн багасгах тохиргоотой хүнд шууд харагдана.
+  `opacity: 1`-ийг ЗААВАЛ буцааж өгнө — эс тэгвэл 0 дээрээ
+  царцаж, жагсаалт бүхэлдээ алга болно.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up {
+    opacity: 1;
+    animation: none;
+  }
+}

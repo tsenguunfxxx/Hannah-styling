@@ -1,6 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Loader2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
@@ -74,6 +81,26 @@ export function VariantPicker({
   const [sizeMissing, setSizeMissing] = useState(false);
   const sizeRef = useRef<HTMLFieldSetElement>(null);
 
+  /*
+    Сагсанд нэмэгдсэний ДАРААХ хоромхон баталгаа.
+
+    Өмнө нь зөвхөн toast гарч байсан — тэр нь дэлгэцийн буланд,
+    дарсан товчноос хол байрладаг. Хүн дарсан товчоо хардаг тул
+    баталгааг ЯГ ТЭНД харуулах нь илүү ойлгомжтой.
+
+    1.8 секундын дараа товч хэвэндээ ордог: хэрэглэгч дахин нэмэх
+    боломжтой хэвээр байгааг харуулах ёстой.
+  */
+  const [justAdded, setJustAdded] = useState(false);
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Хуудсаас гарахад дуусаагүй таймер үлдээхгүй
+  useEffect(() => {
+    return () => {
+      if (addedTimer.current) clearTimeout(addedTimer.current);
+    };
+  }, []);
+
   const selected = findVariant(variants, color, size);
   const totalStock = getTotalStock(variants);
   const isSoldOut = totalStock === 0;
@@ -86,9 +113,18 @@ export function VariantPicker({
   // Хэрэглэгч хэдийг авч чадах вэ
   const maxQuantity = Math.min(selected?.stock ?? 1, MAX_QUANTITY_PER_ITEM);
 
+  /*
+    Товчны дүрсийн байдал. `justAdded` нь `isPending`-ээс ТЭРГҮҮЛНЭ:
+    сервер хариу өгсний дараа ч `router.refresh()` дуустал `isPending`
+    үнэн хэвээр үлддэг тул эсрэгээр бичихэд "эргэлдэх дугуй + Сагсанд
+    НЭМЭГДЛЭЭ" гэсэн зөрчилтэй хослол харагдана.
+  */
+  const iconState = justAdded ? "added" : isPending ? "pending" : "idle";
+
   function handleColorChange(next: string) {
     setColor(next);
     setQuantity(1);
+    setJustAdded(false);
 
     // Шинэ өнгөнд сонгосон размер байхгүй бол размерыг цэвэрлэнэ
     if (size && !isSizeAvailable(variants, next, size)) {
@@ -99,6 +135,9 @@ export function VariantPicker({
   function handleSizeChange(next: string) {
     setSize(next);
     setSizeMissing(false);
+
+    // Өөр размер сонгосон тул өмнөх баталгаа хуучирсан
+    setJustAdded(false);
 
     // Тухайн размерын үлдэгдлээс хэтэрсэн бол тоог буулгана
     const variant = findVariant(variants, color, next);
@@ -128,6 +167,18 @@ export function VariantPicker({
       }
 
       toast.success("Сагсанд нэмэгдлээ.");
+
+      /*
+        Товч дээрх баталгааг асаана. Гэхдээ ЗӨВХӨН энэ хуудсанд
+        үлдэх үед — "шууд худалдаж авах" нь өөр хуудас руу явах тул
+        харагдах ч завгүй, дэмий дахин зурагдана.
+      */
+      if (!thenCheckout) {
+        if (addedTimer.current) clearTimeout(addedTimer.current);
+
+        setJustAdded(true);
+        addedTimer.current = setTimeout(() => setJustAdded(false), 1800);
+      }
 
       // Navbar дээрх сагсны тоог шинэчилнэ
       router.refresh();
@@ -279,12 +330,27 @@ export function VariantPicker({
             disabled={isPending || isSoldOut}
             className="label h-14 flex-1"
           >
-            {isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <ShoppingBag className="size-4" />
-            )}
-            Сагсанд нэмэх
+            {/*
+              `key` нь байдал солигдоход элементийг ШИНЭЭР үүсгэнэ —
+              эс тэгвэл чагт зурагдах, бичиг мандах хөдөлгөөн дахин
+              эхлэхгүй.
+
+              ⚠️ Хоёр түлхүүр ЯЛГААТАЙ угтвартай байх ёстой. Эхэндээ
+              хоёуланг нь "added"/"idle" гэж нэрлээд, ах дүү хоёр
+              элемент ижил түлхүүртэй болчихсон байв. React тэгэхэд
+              хуучин элементийг устгаж чадалгүй шинийг нь хажууд нь
+              нэмдэг — товч дотор цүнх, чагт, дугуй гурав хуримтлагдаж
+              эхэлсэн. Консол "two children with the same key" гэж
+              шууд хэлж байсан.
+            */}
+            <AddToCartIcon
+              key={`icon-${iconState}`}
+              state={iconState}
+            />
+
+            <span key={`label-${justAdded}`} className="rise-in">
+              {justAdded ? "Сагсанд нэмэгдлээ" : "Сагсанд нэмэх"}
+            </span>
           </Button>
 
           <WishlistButton
@@ -304,5 +370,46 @@ export function VariantPicker({
         </Button>
       </div>
     </div>
+  );
+}
+
+/**
+ * "Сагсанд нэмэх" товчны дүрс — гурван байдал.
+ *
+ * ЯАГААД ТУСДАА КОМПОНЕНТ ВЭ?
+ *   Гурван өөр дүрсийг товчны дотор шууд `? :`-ээр сольж байсан.
+ *   Тэгэхэд React хуучин дүрсийг устгаж чадалгүй, шинийг нь хажууд
+ *   нь нэмж тавьдаг байв — чагт, цүнх, эргэлдэх дугуй гурав нэг
+ *   товч дотор зэрэгцэн хуримтлагдаж эхэлсэн.
+ *
+ *   Ганц компонент болгосноор товчны хүүхдүүд ҮРГЭЛЖ ижил хэвээр
+ *   (дүрс + бичиг) үлдэж, дотор нь юу зурагдахыг `state` шийднэ.
+ *
+ * `state` солигдоход `key` нь ч солигдох тул чагт бүрэн эхнээсээ
+ * зурагдана.
+ */
+function AddToCartIcon({ state }: { state: "idle" | "pending" | "added" }) {
+  if (state === "pending") {
+    return <Loader2 className="size-4 animate-spin" />;
+  }
+
+  if (state === "idle") {
+    return <ShoppingBag className="size-4" />;
+  }
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className="size-4"
+    >
+      {/* Өөрөө зурагдах чагт — хөдөлгөөнийг globals.css тайлбарласан */}
+      <path d="M20 6 9 17l-5-5" className="check-draw" />
+    </svg>
   );
 }
