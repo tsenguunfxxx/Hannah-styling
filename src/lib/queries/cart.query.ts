@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { getVerifiedUserId } from "@/lib/auth-guard";
 import { calculateCartTotals, resolveUnitPrice } from "@/lib/cart-utils";
 import { getAppliedCoupon } from "@/lib/queries/coupon.query";
 import type { Prisma } from "@/generated/prisma/client";
@@ -9,25 +10,14 @@ import type { Prisma } from "@/generated/prisma/client";
 /** Зочны сагсыг таних cookie-ийн нэр */
 export const CART_COOKIE = "hannah_cart";
 
-/**
- * Нэвтэрсэн хэрэглэгчийн id — ЗӨВХӨН тэр хэрэглэгч үнэхээр байгаа бол.
- *
- * Нэвтрэх мэдээлэл cookie дотор JWT хэлбэрээр хадгалагддаг тул
- * админ хэрэглэгчийг устгасан ч тэр cookie хүчинтэй хэвээр үлддэг.
- * Шалгахгүй бол байхгүй хэрэглэгчийн сагсыг хайж, сагс байнга
- * хоосон харагдах эсвэл "Foreign key" алдаа өгнө.
- *
- * Сагс УНШИХ, БИЧИХ хоёр зам энэ нэг функцийг ашиглана —
- * ингэснээр хоёулаа үргэлж ижил сагс руу заана.
- */
-export async function getVerifiedUserId(): Promise<string | null> {
-  const session = await auth();
-  if (!session?.user) return null;
+/*
+  `getVerifiedUserId` нь одоо `auth-guard.ts` дотор амьдарна — сагс
+  ганцаараа биш, хүслийн жагсаалт, захиалга, сэтгэгдэл бүгд түүнийг
+  хэрэглэдэг болсон тул нэг л газар байх нь зөв.
 
-  const exists = await prisma.user.count({ where: { id: session.user.id } });
-
-  return exists > 0 ? session.user.id : null;
-}
+  Хуучин импортууд эвдэрхгүйн тулд эндээс дахин экспортлов.
+*/
+export { getVerifiedUserId };
 
 /**
  * Одоогийн хүний сагсыг ЯАЖ олох вэ гэдэг нөхцөл.

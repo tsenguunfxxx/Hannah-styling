@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { getVerifiedUserId } from "@/lib/auth-guard";
 import { getCart } from "@/lib/queries/cart.query";
 import { restoreOrderStock } from "@/lib/order-stock";
 import { COUPON_COOKIE } from "@/lib/queries/coupon.query";
@@ -90,7 +91,15 @@ export async function createOrderAction(
 ): Promise<ActionResult<{ orderNumber: string }>> {
   const session = await auth();
 
-  if (!session?.user) {
+  /*
+    Хэрэглэгч ҮНЭХЭЭР байгаа эсэхийг шалгана. Cookie доторх нэвтрэлт
+    30 хоног хүчинтэй тул бүртгэл устсан ч хүчинтэй хэвээр үлдэж
+    болно. Шалгахгүй бол доорх `order.create` нь байхгүй хэрэглэгч
+    рүү заасан мөр бичих гэж оролдоод өгөгдлийн сан хаяна.
+  */
+  const userId = await getVerifiedUserId();
+
+  if (!session?.user || !userId) {
     return { success: false, error: "Эхлээд нэвтэрнэ үү." };
   }
 
@@ -189,7 +198,7 @@ export async function createOrderAction(
         const order = await tx.order.create({
           data: {
             orderNumber: number,
-            userId: session.user.id,
+            userId,
             subtotal,
             shippingFee,
             discount,
@@ -254,7 +263,7 @@ export async function createOrderAction(
       if (couponId) (await cookies()).delete(COUPON_COOKIE);
 
       // Дараагийн удаад хаягийг урьдчилж бөглөхийн тулд хадгална
-      await saveDefaultAddress(session.user.id, form);
+      await saveDefaultAddress(userId, form);
 
       revalidatePath("/cart");
       revalidatePath("/account/orders");

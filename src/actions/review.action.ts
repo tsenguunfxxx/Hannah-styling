@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { getVerifiedUserId } from "@/lib/auth-guard";
 import { getReviewEligibility } from "@/lib/queries/review.query";
 import { reviewSchema } from "@/schemas/review.schema";
 import type { ActionResult } from "@/types";
@@ -19,9 +20,13 @@ export async function saveReviewAction(
   productId: string,
   input: unknown,
 ): Promise<ActionResult<void>> {
-  const session = await auth();
+  /*
+    Устсан бүртгэлийн cookie-тэй хүн энд хүрвэл доорх `review.upsert`
+    өгөгдлийн санд хаягдана. Тиймээс id-г шалгаж авна.
+  */
+  const userId = await getVerifiedUserId();
 
-  if (!session?.user) {
+  if (!userId) {
     return { success: false, error: "Эхлээд нэвтэрнэ үү." };
   }
 
@@ -52,10 +57,10 @@ export async function saveReviewAction(
 
   // Нэг хүн нэг бараанд НЭГ сэтгэгдэл — дахин бичвэл шинэчлэгдэнэ
   await prisma.review.upsert({
-    where: { productId_userId: { productId, userId: session.user.id } },
+    where: { productId_userId: { productId, userId } },
     create: {
       productId,
-      userId: session.user.id,
+      userId,
       rating: parsed.data.rating,
       comment: parsed.data.comment || null,
     },

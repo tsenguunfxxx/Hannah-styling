@@ -3,22 +3,32 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { getVerifiedUserId } from "@/lib/auth-guard";
 
 /**
  * Wishlist-д нэмэх / хасах.
  * Нэвтрээгүй бол алдаа буцаана — товч дарсан хүнд toast харагдана.
  */
 export async function toggleWishlistAction(productId: string) {
-  const session = await auth();
+  /*
+    `session.user.id`-г ШУУД биш, шалгаж авна.
 
-  if (!session?.user) {
+    Cookie доторх нэвтрэлт 30 хоног хүчинтэй. Тэр хугацаанд бүртгэл
+    уствал cookie нь хүчинтэй хэвээр үлдэж, доорх `upsert` нь
+    байхгүй хэрэглэгч рүү заасан мөр бичих гэж оролдоод өгөгдлийн
+    сан "Foreign key constraint violated" гэж хаядаг байв —
+    хэрэглэгчид улаан алдааны дэлгэц гарна.
+  */
+  const userId = await getVerifiedUserId();
+
+  if (!userId) {
     return { success: false as const, error: "Эхлээд нэвтэрнэ үү." };
   }
 
   // Хэрэглэгчид wishlist байхгүй бол үүсгэнэ
   const wishlist = await prisma.wishlist.upsert({
-    where: { userId: session.user.id },
-    create: { userId: session.user.id },
+    where: { userId },
+    create: { userId },
     update: {},
     select: { id: true },
   });
@@ -46,6 +56,10 @@ export async function toggleWishlistAction(productId: string) {
 
 /** Тухайн хэрэглэгчийн wishlist-д байгаа барааны id-ууд */
 export async function getWishlistProductIds(): Promise<string[]> {
+  /*
+    Энд зөвхөн УНШИНА — байхгүй хэрэглэгчийн id-гаар хайхад юу ч
+    олдохгүй, алдаа ч гарахгүй. Тиймээс нэмэлт асуулга шаардлагагүй.
+  */
   const session = await auth();
   if (!session?.user) return [];
 

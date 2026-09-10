@@ -50,6 +50,29 @@ export async function requireAuth() {
   return { session, user };
 }
 
+/**
+ * Нэвтэрсэн хэрэглэгчийн id — ЗӨВХӨН тэр хэрэглэгч ҮНЭХЭЭР байгаа бол.
+ *
+ * Нэвтрэх мэдээлэл cookie дотор JWT хэлбэрээр хадгалагддаг бөгөөд 30
+ * хоног хүчинтэй. Тэр хугацаанд бүртгэл уствал (админ устгасан, эсвэл
+ * seed дахин ажилласан) cookie нь хүчинтэй хэвээр үлдэнэ. Шалгахгүй
+ * бол `userId`-тай мөр бичих гэж оролдоод өгөгдлийн сан
+ * "Foreign key constraint violated" гэж хаяна — хэрэглэгчид улаан
+ * алдааны дэлгэц харагдана.
+ *
+ * `requireAuth`-аас ялгаатай нь энэ нь ХААШАА Ч шиддэггүй. Server
+ * Action дотор ашиглахад тохиромжтой: null буцаавал дуудсан газраа
+ * эелдэг мессеж буцаана.
+ */
+export async function getVerifiedUserId(): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user) return null;
+
+  const exists = await prisma.user.count({ where: { id: session.user.id } });
+
+  return exists > 0 ? session.user.id : null;
+}
+
 /** ADMIN эсэхийг шалгана. Үгүй бол нүүр рүү буцаана. */
 export async function requireAdmin() {
   const session = await auth();
