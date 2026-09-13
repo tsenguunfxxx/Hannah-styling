@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { formatPrice } from "@/lib/utils";
 import { COUNTRYSIDE, DISTRICTS, PAYMENT_METHODS } from "@/lib/constants";
-import { checkoutSchema, type CheckoutInput } from "@/schemas/order.schema";
+import { makeCheckoutSchema, type CheckoutInput } from "@/schemas/order.schema";
 import { createOrderAction } from "@/actions/order.action";
 
 /**
@@ -34,9 +34,12 @@ import { createOrderAction } from "@/actions/order.action";
 export function CheckoutForm({
   defaultValues,
   total,
+  isGuest,
 }: {
   defaultValues: Partial<CheckoutInput>;
   total: number;
+  /** Нэвтрээгүй хүн — имэйлээ өөрөө бичих шаардлагатай */
+  isGuest: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -55,10 +58,12 @@ export function CheckoutForm({
   */
 
   const form = useForm<CheckoutInput>({
-    resolver: zodResolver(checkoutSchema),
+    // Зочинд имэйл заавал — сервер дээр ч ижил дүрэм дахин шалгагдана
+    resolver: zodResolver(makeCheckoutSchema(isGuest)),
     defaultValues: {
       customerName: "",
       phone: "",
+      email: "",
       district: "Баянгол",
       addressLine: "",
       note: "",
@@ -135,6 +140,41 @@ export function CheckoutForm({
               )}
             />
           </div>
+
+          {/*
+            Имэйлийг ЗӨВХӨН зочноос асууна.
+
+            Нэвтэрсэн хүнийх бүртгэлд нь байгаа тул дахин бичүүлэх нь
+            илүүц. Харин зочинд энэ бол захиалгаа дахин олох цорын
+            ганц зам — баталгаажуулах захидал доторх холбоос нь өөр
+            төхөөрөмж дээр ч ажиллана.
+          */}
+          {isGuest && (
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="mt-5">
+                  <FormLabel className="label text-graphite">Имэйл</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      inputMode="email"
+                      placeholder="name@example.com"
+                      autoComplete="email"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Захиалгын баталгаажуулалт болон холбоосыг энэ хаяг руу
+                    илгээнэ.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </section>
 
         {/* --- ХҮРГЭЛТИЙН ХАЯГ --- */}

@@ -6,11 +6,12 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getVerifiedUserId } from "@/lib/auth-guard";
 import { rememberGuestOrder } from "@/lib/guest-orders";
+import { sendOrderConfirmation } from "@/lib/order-email";
 import { canViewOrder } from "@/lib/queries/order.query";
 import { getCart } from "@/lib/queries/cart.query";
 import { restoreOrderStock } from "@/lib/order-stock";
 import { COUPON_COOKIE } from "@/lib/queries/coupon.query";
-import { checkoutSchema } from "@/schemas/order.schema";
+import { makeCheckoutSchema } from "@/schemas/order.schema";
 import { Prisma } from "@/generated/prisma/client";
 import { ORDER_NUMBER_PREFIX } from "@/lib/constants";
 import type { PaymentMethod } from "@/generated/prisma/enums";
@@ -114,7 +115,15 @@ export async function createOrderAction(
 
   const accountEmail = account?.email ?? null;
 
-  const parsed = checkoutSchema.safeParse(input);
+  /*
+    Зочноос имэйлийг ЗААВАЛ шаардана — тэдэнд захиалгаа дахин олох
+    өөр зам байхгүй. Нэвтэрсэн хүнд шаардахгүй: хаяг нь бүртгэлд
+    байгаа бөгөөд "миний захиалга" хуудсаар нь хянана.
+
+    Энэ шалгалт client дээр нэг удаа хийгддэг ч ЭНД дахин хийгдэж
+    байгаа нь чухал — маягтыг тойрч дуудсан ч дүрэм үйлчилнэ.
+  */
+  const parsed = makeCheckoutSchema(!userId).safeParse(input);
 
   if (!parsed.success) {
     return {
@@ -224,10 +233,12 @@ export async function createOrderAction(
 
               Нэвтэрсэн хүнийх бүртгэлд нь байгаа тул тэндээс авна —
               нэг зүйлийг хоёр удаа бичүүлэх нь илүүц, бас алдаа
-              гаргана. Зочинд имэйл байхгүй тул null үлдэнэ; түүнтэй
-              холбогдох зам нь утас (маягт дээр ЗААВАЛ бөглөгддөг).
+              гаргана. Зочин өөрөө бичсэн байх ёстой (маягт дээр
+              заавал) тул түүнийг нь хадгална — дэлгүүр эзэн админ
+              дотроос харж холбогдоно, шаардлагатай бол захидлыг нь
+              дахин илгээнэ.
             */
-            email: accountEmail,
+            email: accountEmail ?? form.email ?? null,
             district: form.district,
             addressLine: form.addressLine,
             note: form.note || null,
@@ -287,6 +298,43 @@ export async function createOrderAction(
         await saveDefaultAddress(userId, form);
       } else {
         await rememberGuestOrder(orderNumber);
+      }
+
+      /*
+        Баталгаажуулах захидал.
+
+        `await` хийж байгаа нь санаатай: Server Action дууссаны дараа
+        ажиллах ажлыг Vercel таслан зогсоодог тул "дараа явуулъя" гэж
+        орхиж болохгүй. Хэдхэн зуун миллисекунд нэмэгдэх нь захидал
+        огт очихгүй байснаас хавьгүй дээр.
+
+        Дотроо алдаа БАРЬДАГ — захидал явахгүй байснаас болж аль
+        хэдийн үүссэн захиалгыг "амжилтгүй" гэж харуулах нь буруу.
+      */
+      const recipient = accountEmail ?? form.email;
+
+      if (recipient) {
+        await sendOrderConfirmation({
+          to: recipient,
+          orderNumber,
+          customerName: form.customerName,
+          phone: form.phone,
+          district: form.district,
+          addressLine: form.addressLine,
+          note: form.note || null,
+          subtotal,
+          discount,
+          shippingFee,
+          total,
+          isGuest: !userId,
+          items: cart.items.map((item) => ({
+            productName: item.variant.product.name,
+            size: item.variant.size,
+            color: item.variant.color,
+            quantity: item.quantity,
+            lineTotal: item.lineTotal,
+          })),
+        });
       }
 
       revalidatePath("/cart");

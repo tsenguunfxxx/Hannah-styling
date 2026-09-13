@@ -24,6 +24,20 @@ export const checkoutSchema = z.object({
     .trim()
     .regex(/^\d{8}$/, { message: "Утасны дугаар 8 оронтой байх ёстой." }),
 
+  /*
+    Имэйл нь схем дээр СОНГОЛТТОЙ.
+
+    Нэвтэрсэн хүнээс асуухгүй — бүртгэлд нь байгаа. Харин зочноос
+    ЗААВАЛ асууна, эс бөгөөс баталгаажуулах захидал явуулах,
+    захиалгыг нь дараа нь олж өгөх зам үлдэхгүй.
+
+    "Хэнээс заавал асуух вэ" гэдэг нь маягтыг хэн нээснээс хамаардаг
+    тул доорх `makeCheckoutSchema`-д шийдэгдэнэ.
+  */
+  email: z
+    .union([z.literal(""), z.email({ message: "Имэйл хаяг буруу байна." })])
+    .optional(),
+
   district: z.enum(DISTRICTS, { message: "Дүүргээ сонгоно уу." }),
 
   /*
@@ -76,5 +90,32 @@ export const checkoutSchema = z.object({
       });
     }
   });
+
+/**
+ * Зочны маягтын шалгалт — имэйл ЗААВАЛ.
+ *
+ * Үндсэн схем дээр нэмэлт нөхцөл тавина. Ингэснээр талбаруудыг
+ * хоёр удаа тодорхойлохгүй, аль нэгийг нь засаад нөгөөг нь мартах
+ * эрсдэлгүй.
+ */
+const guestCheckoutSchema = checkoutSchema.superRefine((data, ctx) => {
+  if (!data.email) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["email"],
+      message: "Захиалгын мэдээлэл илгээхийн тулд имэйлээ бичнэ үү.",
+    });
+  }
+});
+
+/**
+ * Маягтыг хэн бөглөж байгаагаас хамаарч зөв шалгуурыг сонгоно.
+ *
+ * Client дээр нэг удаа (хэрэглэгчид шууд харуулахын тулд), сервер
+ * дээр ДАХИН (жинхэнэ хамгаалалт) — хоёул ижил дүрэм ашиглана.
+ */
+export function makeCheckoutSchema(isGuest: boolean) {
+  return isGuest ? guestCheckoutSchema : checkoutSchema;
+}
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

@@ -138,3 +138,43 @@ export async function rememberGuestOrder(orderNumber: string): Promise<void> {
     path: "/",
   });
 }
+
+/**
+ * ИМЭЙЛЭЭС НЭЭХ ТҮЛХҮҮР.
+ *
+ * Cookie нь зөвхөн захиалга хийсэн ТЭР хөтөч дээр ажиллана. Гэтэл
+ * баталгаажуулах захидал нь өөр төхөөрөмж дээр (жишээ нь компьютер
+ * дээр захиалаад утсан дээрээ имэйлээ уншихад) нээгдэж болно.
+ *
+ * Тиймээс захидал доторх холбоост богино тамга залгана. Тамга нь
+ * захиалгын дугаараас, серверийн нууц түлхүүрээр үүсэх тул зөвхөн
+ * ТЭР захиалгыг нээнэ — хөрш дугаарт таарахгүй.
+ *
+ * `order-` угтвар нь cookie-гийн тамгатай хольж хутгахаас сэргийлнэ:
+ * нэг зорилгоор үүссэн тамгыг өөр зорилгод ашиглуулахгүй.
+ */
+export function signOrderToken(orderNumber: string): string | null {
+  const secret = getSecret();
+  if (!secret) return null;
+
+  // Урт нь шаардлагагүй — 32 тэмдэгт таахад хангалттай хэцүү
+  return sign(`order-${orderNumber}`, secret).slice(0, 32);
+}
+
+/** Захидлаас ирсэн тамга зөв эсэх */
+export function verifyOrderToken(
+  orderNumber: string,
+  token: string | undefined,
+): boolean {
+  if (!token) return false;
+
+  const expected = signOrderToken(orderNumber);
+  if (!expected) return false;
+
+  const a = Buffer.from(expected);
+  const b = Buffer.from(token);
+
+  if (a.length !== b.length) return false;
+
+  return timingSafeEqual(a, b);
+}

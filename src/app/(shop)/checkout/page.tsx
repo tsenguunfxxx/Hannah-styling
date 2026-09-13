@@ -86,6 +86,7 @@ export default async function CheckoutPage() {
           <CheckoutForm
             defaultValues={defaultValues}
             total={cart.totals.total}
+            isGuest={!userId}
           />
         </div>
 
