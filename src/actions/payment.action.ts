@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { canViewOrder } from "@/lib/queries/order.query";
 import {
   createWireCheckoutSession,
   createWireIntent,
@@ -34,11 +34,13 @@ function getAppUrl(): string {
   );
 }
 
-/** Захиалгыг олоод, энэ хүнийх мөн эсэхийг шалгана */
+/**
+ * Захиалгыг олоод, энэ хүсэлт түүнийг хөндөх эрхтэй эсэхийг шалгана.
+ *
+ * Зочны захиалгыг ч зөвшөөрнө — эзэн нь тамгалсан cookie-гоор
+ * танигдана. Дүрэм нь `canViewOrder` дотор нэг л газар бичигдсэн.
+ */
 async function findOwnedOrder(orderNumber: string) {
-  const session = await auth();
-  if (!session?.user) return null;
-
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     select: {
@@ -62,10 +64,7 @@ async function findOwnedOrder(orderNumber: string) {
 
   if (!order) return null;
 
-  const isOwner = order.userId === session.user.id;
-  const isAdmin = session.user.role === "ADMIN";
-
-  return isOwner || isAdmin ? order : null;
+  return (await canViewOrder(order.userId, order.orderNumber)) ? order : null;
 }
 
 function revalidateOrder(orderNumber: string) {

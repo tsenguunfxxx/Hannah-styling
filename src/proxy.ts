@@ -11,8 +11,18 @@ import { auth } from "@/lib/auth";
  * (lib/auth-guard.ts-ийг үзнэ үү).
  */
 
-/** Нэвтэрсэн хүн л орох боломжтой хуудсууд */
-const PROTECTED_PREFIXES = ["/account", "/checkout", "/wishlist", "/order"];
+/**
+ * Нэвтэрсэн хүн л орох боломжтой хуудсууд.
+ *
+ * `/checkout` болон `/order` энд БАЙХГҮЙ нь санаатай: бүртгэлгүй
+ * хүн ч захиалга хийж, түүнийгээ хянаж чадна. Тэр хоёр хуудас
+ * өөрсдөө шалгалттай — зочин зөвхөн ӨӨРИЙН үүсгэсэн захиалгыг
+ * харна (`lib/guest-orders.ts`-ийг үзнэ үү).
+ *
+ * Харин `/account`, `/wishlist` нь бүртгэлтэй салшгүй холбоотой
+ * тул хэвээрээ хаалттай.
+ */
+const PROTECTED_PREFIXES = ["/account", "/wishlist"];
 
 /** Зөвхөн ADMIN орох хуудсууд */
 const ADMIN_PREFIX = "/admin";

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { ownsGuestOrder } from "@/lib/guest-orders";
 
 /**
  * Захиалга УНШИХ асуулгууд.
@@ -46,11 +47,13 @@ export async function getMyOrders() {
  *
  * Өөрийнх биш бол null буцаана — "байхгүй" гэсэнтэй ижил.
  * Ингэснээр хэн нэгэн дугаар таамаглаад бусдын захиалгыг үзэх боломжгүй.
+ *
+ * ГУРВАН хүн үзэх эрхтэй:
+ *   1. Захиалсан хэрэглэгч өөрөө
+ *   2. Админ
+ *   3. Тэр захиалгыг үүсгэсэн ЗОЧИН — тамгалсан cookie-гоор нь таньж
  */
 export async function getOrderByNumber(orderNumber: string) {
-  const session = await auth();
-  if (!session?.user) return null;
-
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     include: {
@@ -62,13 +65,37 @@ export async function getOrderByNumber(orderNumber: string) {
 
   if (!order) return null;
 
-  // Админ бүх захиалгыг харна, хэрэглэгч зөвхөн өөрийнхөө
-  const isOwner = order.userId === session.user.id;
-  const isAdmin = session.user.role === "ADMIN";
+  return (await canViewOrder(order.userId, orderNumber)) ? order : null;
+}
 
-  if (!isOwner && !isAdmin) return null;
+/**
+ * Энэ хүсэлт тухайн захиалгыг үзэх эрхтэй эсэх.
+ *
+ * Захиалгыг үзэх, төлөх, цуцлах гурван зам бүгд ЭНЭ нэг дүрмийг
+ * дагана — ингэснээр нэг газарт нь эрх нээгээд нөгөөд нь мартах
+ * боломжгүй.
+ */
+export async function canViewOrder(
+  orderUserId: string | null,
+  orderNumber: string,
+): Promise<boolean> {
+  const session = await auth();
 
-  return order;
+  if (session?.user) {
+    if (session.user.role === "ADMIN") return true;
+    if (orderUserId && orderUserId === session.user.id) return true;
+  }
+
+  /*
+    Бүртгэлгүй захиалга (`userId` нь null) бол зөвхөн түүнийг
+    үүсгэсэн хөтөч нээнэ. Cookie нь серверийн нууц түлхүүрээр
+    тамгалагдсан тул хуурамчаар үйлдэх боломжгүй.
+
+    Бүртгэлтэй захиалгад cookie ажиллахгүй — эзэн нь тодорхой байна.
+  */
+  if (orderUserId === null) return ownsGuestOrder(orderNumber);
+
+  return false;
 }
 
 export type OrderListItem = Awaited<ReturnType<typeof getMyOrders>>[number];

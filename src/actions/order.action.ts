@@ -4,8 +4,9 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
 import { getVerifiedUserId } from "@/lib/auth-guard";
+import { rememberGuestOrder } from "@/lib/guest-orders";
+import { canViewOrder } from "@/lib/queries/order.query";
 import { getCart } from "@/lib/queries/cart.query";
 import { restoreOrderStock } from "@/lib/order-stock";
 import { COUPON_COOKIE } from "@/lib/queries/coupon.query";
@@ -89,19 +90,29 @@ async function buildOrderNumber(tx: Prisma.TransactionClient): Promise<string> {
 export async function createOrderAction(
   input: unknown,
 ): Promise<ActionResult<{ orderNumber: string }>> {
-  const session = await auth();
-
   /*
-    Хэрэглэгч ҮНЭХЭЭР байгаа эсэхийг шалгана. Cookie доторх нэвтрэлт
-    30 хоног хүчинтэй тул бүртгэл устсан ч хүчинтэй хэвээр үлдэж
-    болно. Шалгахгүй бол доорх `order.create` нь байхгүй хэрэглэгч
-    рүү заасан мөр бичих гэж оролдоод өгөгдлийн сан хаяна.
+    НЭВТЭРСЭН ЭСЭХ нь ЗААВАЛ биш.
+
+    Зочин ч захиалга хийж болно — тэр үед `userId` нь null үлдэнэ
+    (Order.userId нь схем дээр хүсэлтээр (`String?`) тодорхойлогдсон).
+
+    `getVerifiedUserId` нь нэмээд хэрэглэгч ҮНЭХЭЭР байгаа эсэхийг
+    шалгадаг: нэвтрэх cookie 30 хоног хүчинтэй тул бүртгэл устсан ч
+    хүчинтэй хэвээр үлдэж болно. Шалгахгүй бол `order.create` нь
+    байхгүй хэрэглэгч рүү заасан мөр бичих гэж оролдоод өгөгдлийн
+    сан хаяна. Ийм үед зочин мэт үзэж захиалгыг нь үргэлжлүүлнэ —
+    сагсандаа бараа хийчихсэн хүнийг хоосон гараар явуулах нь утгагүй.
   */
   const userId = await getVerifiedUserId();
 
-  if (!session?.user || !userId) {
-    return { success: false, error: "Эхлээд нэвтэрнэ үү." };
-  }
+  const account = userId
+    ? await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true },
+      })
+    : null;
+
+  const accountEmail = account?.email ?? null;
 
   const parsed = checkoutSchema.safeParse(input);
 
@@ -198,6 +209,7 @@ export async function createOrderAction(
         const order = await tx.order.create({
           data: {
             orderNumber: number,
+            // Зочны захиалгад null — доорх cookie-гоор таних болно
             userId,
             subtotal,
             shippingFee,
@@ -208,11 +220,14 @@ export async function createOrderAction(
             customerName: form.customerName,
             phone: form.phone,
             /*
-              Имэйлийг хэрэглэгчээс АСУУХГҮЙ — checkout нь нэвтэрсэн
-              хүнд л нээгддэг тул бүртгэлээс нь шууд авна. Нэг зүйлийг
-              хоёр удаа бичүүлэх нь илүүц, бас бичих алдаа гаргана.
+              Имэйлийг маягт дээр АСУУХГҮЙ.
+
+              Нэвтэрсэн хүнийх бүртгэлд нь байгаа тул тэндээс авна —
+              нэг зүйлийг хоёр удаа бичүүлэх нь илүүц, бас алдаа
+              гаргана. Зочинд имэйл байхгүй тул null үлдэнэ; түүнтэй
+              холбогдох зам нь утас (маягт дээр ЗААВАЛ бөглөгддөг).
             */
-            email: session.user.email ?? null,
+            email: accountEmail,
             district: form.district,
             addressLine: form.addressLine,
             note: form.note || null,
@@ -262,8 +277,17 @@ export async function createOrderAction(
       // дараагийн захиалгад дахин хэрэглэгдэхээс сэргийлнэ
       if (couponId) (await cookies()).delete(COUPON_COOKIE);
 
-      // Дараагийн удаад хаягийг урьдчилж бөглөхийн тулд хадгална
-      await saveDefaultAddress(userId, form);
+      /*
+        Зочин бол дараа нь энэ захиалгыг таних цорын ганц зам нь
+        cookie. Тамгалсан cookie тул гаднаас хуурамчаар үйлдэх
+        боломжгүй — `lib/guest-orders.ts`-ийг үзнэ үү.
+      */
+      if (userId) {
+        // Дараагийн удаад хаягийг урьдчилж бөглөхийн тулд хадгална
+        await saveDefaultAddress(userId, form);
+      } else {
+        await rememberGuestOrder(orderNumber);
+      }
 
       revalidatePath("/cart");
       revalidatePath("/account/orders");
@@ -336,12 +360,6 @@ const CANCELLABLE_BY_CUSTOMER = ["PENDING", "CONFIRMED"];
 export async function cancelOrderAction(
   orderNumber: string,
 ): Promise<ActionResult<void>> {
-  const session = await auth();
-
-  if (!session?.user) {
-    return { success: false, error: "Эхлээд нэвтэрнэ үү." };
-  }
-
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     select: {
@@ -359,9 +377,14 @@ export async function cancelOrderAction(
     },
   });
 
-  // Өөрийнх биш бол "олдсонгүй" гэж хариулна —
-  // бусдын захиалга байгаа эсэхийг ч мэдэгдэхгүй
-  if (!order || order.userId !== session.user.id) {
+  /*
+    Өөрийнх биш бол "олдсонгүй" гэж хариулна — бусдын захиалга
+    байгаа эсэхийг ч мэдэгдэхгүй.
+
+    Зочин ч өөрийн захиалгаа цуцалж чадна: `canViewOrder` нь
+    тамгалсан cookie-г шалгаж таньдаг.
+  */
+  if (!order || !(await canViewOrder(order.userId, orderNumber))) {
     return { success: false, error: "Захиалга олдсонгүй." };
   }
 

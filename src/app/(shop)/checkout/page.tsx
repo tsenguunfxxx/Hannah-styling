@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { requireAuth } from "@/lib/auth-guard";
+import { getVerifiedUserId } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { getCart } from "@/lib/queries/cart.query";
 import { DISTRICTS } from "@/lib/constants";
@@ -15,13 +15,28 @@ export const metadata: Metadata = { title: "Захиалга баталгааж�
 /**
  * CHECKOUT ХУУДАС.
  *
- * Гурван хамгаалалт:
- *   1. proxy.ts    — нэвтрээгүй бол /login руу
- *   2. requireAuth — энд дахин шалгана (proxy тойрогдвол ч)
- *   3. Server Action — эцсийн шалгалт бичих мөчид
+ * НЭВТРЭХ ШААРДЛАГАГҮЙ. Бүртгэлгүй хүн ч захиалга хийж болно —
+ * дэлгүүрт орж ирсэн хүнийг эхлээд бүртгүүл гэж шаардах нь
+ * худалдан авалтыг хамгийн их таслан зогсоодог зүйл.
+ *
+ * Нэвтэрсэн хүнд маягтыг урьдчилж бөглөж өгнө; зочинд хоосон.
+ * Аль ч тохиолдолд ХАЯГ заавал бөглөгдсөн байж захиалга үүснэ —
+ * тэр шалгалт нь `checkoutSchema` дотор, сервер дээр дахин хийгдэнэ.
  */
 export default async function CheckoutPage() {
-  const { user: account } = await requireAuth();
+  /*
+    `requireAuth` биш — тэр нь нэвтрээгүй хүнийг /login руу шиддэг.
+    `getVerifiedUserId` нь зүгээр л id буцаана, зочинд null.
+  */
+  const userId = await getVerifiedUserId();
+
+  const account = userId
+    ? await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true, phone: true },
+      })
+    : null;
+
   const cart = await getCart();
 
   // Хоосон сагстай checkout утгагүй
@@ -43,16 +58,18 @@ export default async function CheckoutPage() {
 
   /*
     Өмнө нь хадгалсан хаяг байвал маягтыг урьдчилж бөглөнө.
-    Хэрэглэгчийн нэр, имэйл, утсыг requireAuth аль хэдийн буцаасан.
+    Зочинд ийм зүйл байхгүй тул хоосон маягт харагдана.
   */
-  const address = await prisma.address.findFirst({
-    where: { userId: account.id },
-    orderBy: { isDefault: "desc" },
-  });
+  const address = userId
+    ? await prisma.address.findFirst({
+        where: { userId },
+        orderBy: { isDefault: "desc" },
+      })
+    : null;
 
   const defaultValues: Partial<CheckoutInput> = {
-    customerName: address?.recipientName ?? account.name ?? "",
-    phone: address?.phone ?? account.phone ?? "",
+    customerName: address?.recipientName ?? account?.name ?? "",
+    phone: address?.phone ?? account?.phone ?? "",
     district: isKnownDistrict(address?.district) ? address.district : "Баянгол",
     addressLine: address?.addressLine ?? "",
   };
