@@ -137,7 +137,17 @@ export function VariantEditor({
                     key={preset.label}
                     type="button"
                     aria-pressed={picked}
-                    onClick={() => setSizes(preset.sizes)}
+                    /*
+                      Дарагдсан багцыг дахин дархад ТАЙЛАГДАНА.
+
+                      Өмнө нь ямагт ижил утга онооход `picked` хэзээ ч
+                      унтардаггүй байв: андуурч сонгосон админ дахин
+                      дарж цуцлахыг оролдоод юу ч болохгүй, маягтаа
+                      дахин ачаалахаас өөр арга үлддэггүй байлаа.
+                      Доорх өнгөний товч анхнаасаа тайлагддаг тул
+                      хоёр эгнээ одоо ижил аашилна.
+                    */
+                    onClick={() => setSizes(picked ? [] : preset.sizes)}
                     className={cn(
                       "label border px-3 py-2 transition-colors",
                       picked
