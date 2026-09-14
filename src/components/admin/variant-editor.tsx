@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberField } from "@/components/admin/number-field";
+import { cn } from "@/lib/utils";
 import { compareSizes } from "@/lib/variant-utils";
 import { KIDS_SIZES, LETTER_SIZES } from "@/lib/constants";
 import type { ProductVariantInput } from "@/schemas/product.schema";
@@ -114,17 +115,40 @@ export function VariantEditor({
           {/* Размер */}
           <div>
             <p className="text-xs text-graphite">Размер</p>
+            {/*
+              Сонгогдсоныг ХАРУУЛНА.
+
+              Өмнө нь дарсан ч товч огт өөрчлөгддөггүй байсан тул
+              "дарагдсан уу, үгүй юу" гэдэг нь мэдэгдэхгүй, доорх
+              жижиг "Сонгосон: ..." мөрөөс л таамаглах байлаа.
+
+              Барааны хуудасны размер сонгох товчтой ЯГ ИЖИЛ хэлбэр
+              ашиглав: сонгогдсон нь хар дэвсгэртэй.
+            */}
             <div className="mt-2 flex flex-wrap gap-2">
-              {SIZE_PRESETS.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => setSizes(preset.sizes)}
-                  className="label border border-line px-3 py-2 transition-colors hover:border-ink"
-                >
-                  {preset.label}
-                </button>
-              ))}
+              {SIZE_PRESETS.map((preset) => {
+                // Яг энэ багц одоо сонгогдсон эсэх
+                const picked =
+                  sizes.length === preset.sizes.length &&
+                  preset.sizes.every((size) => sizes.includes(size));
+
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    aria-pressed={picked}
+                    onClick={() => setSizes(preset.sizes)}
+                    className={cn(
+                      "label border px-3 py-2 transition-colors",
+                      picked
+                        ? "border-ink bg-ink text-bone"
+                        : "border-line hover:border-ink",
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
             </div>
 
             {sizes.length > 0 && (
@@ -150,14 +174,25 @@ export function VariantEditor({
                           : [...current, preset],
                       )
                     }
-                    className={
-                      "label flex items-center gap-2 border px-3 py-2 transition-colors " +
-                      (picked ? "border-ink" : "border-line hover:border-graphite")
-                    }
+                    aria-pressed={picked}
+                    className={cn(
+                      "label flex items-center gap-2 border px-3 py-2 transition-colors",
+                      picked
+                        ? "border-ink bg-ink text-bone"
+                        : "border-line hover:border-ink",
+                    )}
                   >
                     <span
                       style={{ backgroundColor: preset.hex }}
-                      className="size-3 border border-line"
+                      /*
+                        Хар дэвсгэр дээр хар өнгөний дөрвөлжин
+                        харагдахгүй болно — тиймээс сонгогдсон үед
+                        хүрээг нь цайвар болгоно.
+                      */
+                      className={cn(
+                        "size-3 border",
+                        picked ? "border-bone/50" : "border-line",
+                      )}
                     />
                     {preset.name}
                   </button>
