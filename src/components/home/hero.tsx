@@ -33,7 +33,15 @@ export function Hero() {
         энэ div байрлалаа алдвал зураг section-д наалдаж,
         хоёр баганыг гаталж бүтэн өргөнөөр тархана.
       */}
-      <div className="absolute inset-0 bg-sand lg:relative lg:order-last lg:aspect-3/4">
+      {/*
+        `data-hero-image` — нээх дэлгэцийн зураг ЯГ хаана буух ёстойг
+        `hero-intro.tsx` энэ тэмдэгээр олж хэмжинэ. Зөвхөн таних
+        тэмдэг тул харагдах байдалд ямар ч нөлөөгүй.
+      */}
+      <div
+        data-hero-image
+        className="absolute inset-0 bg-sand lg:relative lg:order-last lg:aspect-3/4"
+      >
         <Image
           src={HERO.image}
           alt={HERO.alt}

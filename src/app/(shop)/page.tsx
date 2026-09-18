@@ -7,6 +7,7 @@ import { getMainCategories } from "@/lib/queries/category.query";
 import { getWishlistProductIds } from "@/actions/wishlist.action";
 
 import { Hero } from "@/components/home/hero";
+import { HeroIntro } from "@/components/home/hero-intro";
 import { CategoryGrid } from "@/components/home/category-grid";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeader } from "@/components/shared/section-header";
@@ -29,7 +30,14 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero />
+      {/*
+        Нээх дэлгэц: эхлээд зураг бүтэн дэлгэцээр гарч, доошоо
+        гүйлгэхэд ердийн hero дээрээ жижгэрч буудаг. Hero өөрөө
+        огт өөрчлөгдөөгүй — зөвхөн ороолгодсон.
+      */}
+      <HeroIntro>
+        <Hero />
+      </HeroIntro>
 
       {/* Шинэ бараа */}
       <section className="container-shop py-16 lg:py-24">
