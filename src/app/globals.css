@@ -388,20 +388,60 @@
      цайвар зурвас анивчихгүй.
    ============================================================ */
 body:has([data-hero-intro="on"]) [data-navbar] {
-  background-color: transparent;
-  border-color: transparent;
-  color: var(--bone);
+  /*
+    `--nav-reveal` (0 → 1) — нээх дэлгэцийн эхний 18%-д 0-оос 1 болно.
+    `hero-intro.tsx` кадр тутамд бичнэ.
+
+      0 = бүрэн тунгалаг, цайвар бичиг (зурагтай нийлсэн)
+      1 = өөрийн ердийн цайвар байдал
+
+    JS ачаалагдаагүй бол нөөц утга нь 0 — өөрөөр хэлбэл гүйгээгүй
+    хуудсанд харагдах ёстой байдал. Тиймээс анивчилт үүсэхгүй.
+
+    `transition: none` — утгыг гүйлгэлтээс шууд жолоодож байгаа тул
+    CSS-ийн өөрийн шилжилт нэмэгдвэл хоцрогдол үүснэ.
+  */
+  background-color: color-mix(
+    in oklab,
+    var(--bone) calc(var(--nav-reveal, 0) * 90%),
+    transparent
+  );
+  border-color: color-mix(
+    in oklab,
+    var(--line) calc(var(--nav-reveal, 0) * 100%),
+    transparent
+  );
+  color: color-mix(
+    in oklab,
+    var(--ink) calc(var(--nav-reveal, 0) * 100%),
+    var(--bone)
+  );
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+  transition: none;
 }
 
-/* Хар дэвсгэртэй жижиг тоо бараан зураг дээр алга болно — эргүүлнэ */
+/* Сагс/хүслийн жижиг тоо — дэвсгэртэйгээ хамт эргэнэ */
 body:has([data-hero-intro="on"]) [data-navbar] [data-nav-badge] {
-  background-color: var(--bone);
-  color: var(--ink);
+  background-color: color-mix(
+    in oklab,
+    var(--ink) calc(var(--nav-reveal, 0) * 100%),
+    var(--bone)
+  );
+  color: color-mix(
+    in oklab,
+    var(--bone) calc(var(--nav-reveal, 0) * 100%),
+    var(--ink)
+  );
+  transition: none;
 }
 
 /* "Админ" товчны цайвар саарал хүрээ бараан дээр харагдахгүй */
 body:has([data-hero-intro="on"]) [data-navbar] a[href="/admin"] {
-  border-color: color-mix(in oklch, var(--bone) 45%, transparent);
+  border-color: color-mix(
+    in oklab,
+    var(--line) calc(var(--nav-reveal, 0) * 100%),
+    color-mix(in oklab, var(--bone) 45%, transparent)
+  );
+  transition: none;
 }
