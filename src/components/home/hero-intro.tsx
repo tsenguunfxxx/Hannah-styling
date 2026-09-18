@@ -69,6 +69,7 @@ export function HeroIntro({ children }: { children: React.ReactNode }) {
     const cancel = () => {
       spacer.style.display = "none";
       overlay.style.display = "none";
+      overlay.dataset.heroIntro = "off"; // navbar ердийн байдалдаа
       hero.style.opacity = "1";
       target.style.opacity = "1";
     };
@@ -146,6 +147,12 @@ export function HeroIntro({ children }: { children: React.ReactNode }) {
           target.style.opacity = done ? "1" : "0";
 
           /*
+            Navbar-ын өнгийг энэ тэмдэг шийднэ. Нээх дэлгэц дээр
+            тунгалаг, дуусмагц ердийн цайвар. Дүрэм нь `globals.css`-д.
+          */
+          overlay.dataset.heroIntro = done ? "off" : "on";
+
+          /*
             Жинхэнэ hero (текст, товчнууд) нь нөмрөг жижгэрч эхэлсний
             дараа аажим гарч ирнэ. 0.3-аас өмнө харагдвал бүтэн
             дэлгэцийн зургийн ард сүүдэр мэт дүнсийж мэдэнэ.
@@ -193,8 +200,47 @@ export function HeroIntro({ children }: { children: React.ReactNode }) {
       <div
         ref={overlayRef}
         aria-hidden
-        className="fixed inset-0 z-30 overflow-hidden bg-ink"
+        data-hero-intro="on"
+        /*
+          Дэвсгэр нь зургийн өөрийнх нь бараан бор өнгө (#3c2313 —
+          зургийн хажуу захаас хэмжсэн). Зураг ачаалагдаж амжаагүй
+          эхний агшинд ч дэлгэц зурагтайгаа ижил өнгөтэй байна.
+        */
+        className="fixed inset-0 z-30 overflow-hidden bg-[#3c2313]"
       >
+        {/*
+          БҮДЭГ ДЭВСГЭР (зөвхөн өргөн дэлгэцэнд).
+
+          Доор бүтэн зургийг `object-contain`-аар тавина — өөрөөр
+          хэлбэл зураг БҮХЭЛДЭЭ харагдана, толгой нь таарахгүй.
+          Гэхдээ зураг босоо (3:4), дэлгэц хэвтээ тул хоёр хажуудаа
+          хоосон зай үлдэнэ. Тэр зайг ижил зургийн бүдгэрүүлсэн,
+          томсгосон хуулбараар дүүргэнэ — өнгө нь өндөр бүрт
+          таарах тул зааг мэдэгдэхгүй.
+
+          `sizes="64px"` — бүдгэрсэн зурагт нарийвчлал хэрэггүй.
+          Хөтөч хамгийн жижиг хувилбарыг нь татна (хэдхэн KB).
+        */}
+        <Image
+          src={HERO.image}
+          alt=""
+          fill
+          priority
+          sizes="64px"
+          quality={30}
+          className="hidden scale-110 object-cover blur-2xl brightness-[0.5] lg:block"
+        />
+
+        {/*
+          БҮТЭН ЗУРАГ.
+
+          `lg:object-contain` — өргөн дэлгэцэнд зураг бүхэлдээ.
+          Утсанд `object-cover` хэвээр: утасны дэлгэц өөрөө босоо тул
+          тайралт бага, гол нь ЖИНХЭНЭ hero-гийн зураг мөн `cover`
+          учраас шилжилт дуусах мөчид хоёулаа ЯГ адилхан харагдана.
+          (Өргөн дэлгэцэнд төгсгөлийн хайрцаг яг 3:4 болдог тул
+          `contain` ба `cover` хоёр ижил үр дүн өгнө.)
+        */}
         <Image
           src={HERO.image}
           alt=""
@@ -202,25 +248,60 @@ export function HeroIntro({ children }: { children: React.ReactNode }) {
           priority
           sizes="100vw"
           quality={90}
-          className="object-cover"
+          className="object-cover lg:object-contain"
         />
 
         {/*
           Бичиг уншигдахуйц байхын тулд зургийг бараатуулна.
           Дунд хэсэг нь илүү бараан — цагаан бичиг яг тэнд таарна.
         */}
+        {/*
+          Жигд, зөөлөн бүдгэрүүлэлт — нэр уншигдахад хангалттай,
+          зургийг булингартуулахгүй. Өмнө нь доод талыг нь хэт
+          бараатгасан тул загвар өөрөө алга болж байлаа.
+        */}
+        <span aria-hidden className="absolute inset-0 bg-ink/35" />
+
+        {/*
+          Доод зах дээр л нэмж бараатгана — жижиг мөр тэнд суух тул.
+          Зургийн гол хэсэгт хүрэхгүй.
+        */}
         <span
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-ink/35 via-ink/60 to-ink/35"
+          className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-ink/80 to-transparent"
         />
 
-        <div
-          ref={titleRef}
-          className="absolute inset-0 grid place-items-center px-5"
-        >
-          <p className="text-center font-display text-[13vw] leading-none font-medium uppercase tracking-tight text-bone sm:text-[11vw]">
-            Hannah Styling
-          </p>
+        {/*
+          БРЭНДИЙН НЭР.
+
+          Cormorant Garamond — нимгэн, өндөр ялгаралтай serif.
+          Загварын сэтгүүлийн нүүр шиг харагдуулахын тулд:
+            • `font-light` — нарийн зурвастай, эрхэмсэг
+            • `tracking-[0.08em]` — үсэг хооронд амьсгал өгнө
+            • доогуур нь үсээр татсан зураас, дараа нь жижиг мөр
+          Доод хоёр нь нэрийг "тэмдэг" болгож, зүгээр бичиг
+          биш логон шиг унших боломж олгоно.
+        */}
+        <div ref={titleRef} className="absolute inset-0">
+          {/* Нэр — дэлгэцийн яг голд */}
+          <div className="flex h-full items-center justify-center px-5">
+            <p className="text-center font-editorial text-[13vw] leading-[0.92] font-light uppercase tracking-[0.08em] text-bone sm:text-[11vw]">
+              Hannah Styling
+            </p>
+          </div>
+
+          {/*
+            Зураас ба жижиг мөр нь ДООД ТАЛД.
+
+            Эхэндээ нэрийн яг доор тавьсан байв. Гэтэл тэр хэсэгт
+            загварын цагаан даашинз таарч, цагаан бичиг дээр нь
+            уусаад алга болдог байлаа. Доод зах нь бараан тул
+            уншигдана — мөн нэр илүү чөлөөтэй амьсгалж байна.
+          */}
+          <div className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-4 sm:bottom-12">
+            <span aria-hidden className="h-px w-20 bg-bone/50 sm:w-28" />
+            <p className="label text-bone/80">elegant babies</p>
+          </div>
         </div>
       </div>
 

@@ -25,7 +25,20 @@ export async function Navbar() {
   const isAdmin = session?.user?.role === "ADMIN";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bone/90 backdrop-blur-md">
+    /*
+      `data-navbar` — нүүр хуудсыг нээх дэлгэц идэвхтэй үед энэ мөрийг
+      ТУНГАЛАГ болгож, бичгийг нь цайвар болгоно. Дүрэм нь `globals.css`
+      дотор (`body:has([data-hero-intro="on"])`). Гүйлгэж дуусахад
+      өөрөө ердийн байдалдаа эргэж ирнэ.
+
+      `transition-colors` — тэр шилжилтийг зөөлрүүлнэ. Доторх лого,
+      цэс, дүрс тэмдэг бүгд `currentColor` өвлөдөг тул энд нэг л
+      удаа бичихэд хангалттай.
+    */
+    <header
+      data-navbar
+      className="sticky top-0 z-40 border-b border-line bg-bone/90 backdrop-blur-md transition-colors duration-500"
+    >
       {/*
         Жижиг дэлгэц: лого зүүнд, товчнууд баруунд (flex justify-between).
         lg-ээс дээш: гурван багана — зүүнд лого, голд цэс, баруунд товчнууд.
@@ -107,7 +120,10 @@ export async function Navbar() {
 /** Icon дээрх жижиг тоо */
 function Badge({ count }: { count: number }) {
   return (
-    <span className="absolute -top-1 -right-1 grid size-4 place-items-center bg-ink text-[10px] leading-none text-bone tabular-nums">
+    <span
+      data-nav-badge
+      className="absolute -top-1 -right-1 grid size-4 place-items-center bg-ink text-[10px] leading-none text-bone transition-colors duration-500 tabular-nums"
+    >
       {count > 9 ? "9+" : count}
     </span>
   );

@@ -24,6 +24,7 @@
   /* --- Фонт --- */
   --font-sans: var(--font-body);       /* Inter — энгийн текст */
   --font-display: var(--font-heading-face); /* Jost — гарчиг, товч, лого */
+  --font-editorial: var(--font-editorial-face); /* Cormorant — нээх дэлгэцийн нэр */
   --font-mono: var(--font-geist-mono);
 
   /* --- Үсгийн зай: tracking-label --- */
@@ -366,4 +367,41 @@
     stroke-dashoffset: 0;
     animation: none;
   }
+}
+
+/* ============================================================
+   НЭЭХ ДЭЛГЭЦ ИДЭВХТЭЙ ҮЕИЙН NAVBAR
+
+   Нүүр хуудас нээгдэхэд зураг бүтэн дэлгэцийг эзэлнэ. Тэр үед
+   дээр нь цайвар мөр зурвасхийж зогсвол эвгүй — тиймээс navbar
+   ТУНГАЛАГ болж, зурагтайгаа нийлнэ. Гүйлгэж дуусахад ердийн
+   цайвар байдалдаа эргэж ирнэ.
+
+   ЯАГААД `:has()` ВЭ?
+     Navbar нь хуудасны агуулгаас ДЭЭР, өөр мөчирт байрладаг тул
+     нүүр хуудаснаас шууд хандаж чадахгүй. `:has()` нь "ийм
+     тэмдэгтэй элемент хуудсанд байна уу" гэдгээр холбож өгнө.
+
+   ЯАГААД JS-ЭЭР КЛАСС НЭМЭХГҮЙ ВЭ?
+     Тэмдэг нь сервер талаас ШУУД "on" гэж ирдэг. JS ачаалагдаж
+     амжаагүй эхний агшинд ч navbar аль хэдийн тунгалаг байх тул
+     цайвар зурвас анивчихгүй.
+   ============================================================ */
+body:has([data-hero-intro="on"]) [data-navbar] {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--bone);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Хар дэвсгэртэй жижиг тоо бараан зураг дээр алга болно — эргүүлнэ */
+body:has([data-hero-intro="on"]) [data-navbar] [data-nav-badge] {
+  background-color: var(--bone);
+  color: var(--ink);
+}
+
+/* "Админ" товчны цайвар саарал хүрээ бараан дээр харагдахгүй */
+body:has([data-hero-intro="on"]) [data-navbar] a[href="/admin"] {
+  border-color: color-mix(in oklch, var(--bone) 45%, transparent);
 }

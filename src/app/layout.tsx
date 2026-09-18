@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Jost, Inter } from "next/font/google";
+import { Jost, Inter, Cormorant_Garamond } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 /**
  * Jost  — геометр хэлбэртэй, fashion брэндэд тохирсон. Гарчиг, лого, товчинд.
  * Inter — уншихад амар. Энгийн текст, үнэ, форминд.
+ * Cormorant Garamond — нимгэн, өндөр ялгаралтай serif. Загварын сэтгүүлийн
+ *   маягтай тул ЗӨВХӨН нүүр хуудсыг нээх том нэрэнд хэрэглэнэ. Бүх хуудсанд
+ *   тараавал уншихад хүндрэх тул санаатай хязгаарласан.
  */
 const jost = Jost({
   variable: "--font-heading-face",
@@ -16,6 +19,14 @@ const jost = Jost({
 const inter = Inter({
   variable: "--font-body",
   subsets: ["latin", "cyrillic"], // Монгол кирилл үсэг зөв гарна
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-editorial-face",
+  subsets: ["latin"],
+  // Зөвхөн нэг нэр бичих тул хэрэгтэй жингээ л татна
+  weight: ["300", "400"],
   display: "swap",
 });
 
@@ -44,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="mn"
-      className={`${jost.variable} ${inter.variable} h-full`}
+      className={`${jost.variable} ${inter.variable} ${cormorant.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
         {children}
