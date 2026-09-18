@@ -21,7 +21,30 @@ import { HERO } from "@/lib/constants";
  */
 export function Hero() {
   return (
-    <section className="relative lg:grid lg:grid-cols-2">
+    /*
+      lg дээр НЭГ ДЭЛГЭЦЭНД ЯГ БАГТАНА.
+
+      Өмнө нь өндөр нь зургийн харьцаанаас (3:4) гардаг байв.
+      1280px өргөнтэй дэлгэц дээр багана нь 640px → зураг 853px өндөр
+      болж, 800px өндөртэй цонхонд багтахаа больдог. Том дэлгэц дээр
+      бүр дордоно: 1920px дээр зураг 1280px өндөр болно.
+
+      Одоо өндрийг нь ДЭЛГЭЦЭЭС гаргана:
+        100svh − 5rem (navbar-ийн `h-20`) − 1px (navbar-ийн доод зураас)
+      Тэр хоёр тоо `navbar.tsx`-аас гаралтай — тэнд өөрчилвөл эндээ
+      бас засна.
+
+      `svh` ашигласан нь санаатай: гар утасны хөтчийн хаяг бичих мөр
+      нуугдаж гарахад `vh` үсэрдэг.
+
+      ЯАГААД `h-` БИШ `min-h-` ВЭ?
+        Хатуу өндөр өгвөл МАШ НАМХАН цонхон дээр (ж нь 1280×640)
+        гарчиг section-оосоо халиад, дээд мөр нь navbar-ийн доогуур
+        орж, товч нь доороо гарч зурагдана. `min-h-` бол ердийн
+        дэлгэц дээр яг нэг нүүр болж таарна, харин текст үнэхээр
+        багтахгүй бол л сунана — давхцахаас гүйлгэх нь дээр.
+    */
+    <section className="relative lg:grid lg:min-h-[calc(100svh-5rem-1px)] lg:grid-cols-2">
       {/*
         Зураг.
         Утсанд: бүх талбарыг эзэлнэ (absolute inset-0).
@@ -38,9 +61,19 @@ export function Hero() {
         `hero-intro.tsx` энэ тэмдэгээр олж хэмжинэ. Зөвхөн таних
         тэмдэг тул харагдах байдалд ямар ч нөлөөгүй.
       */}
+      {/*
+        lg дээр зураг БОСОО ХАВТАН болж, баруун зах руугаа тулна.
+
+        `lg:h-full` — дээрх дэлгэцийн өндрийг дүүргэнэ.
+        `lg:aspect-3/4` + `lg:w-auto` + `lg:justify-self-end` — өргөн нь
+        одоо өндрөөсөө гарна (өндөр × 3/4). Ингэснээр зураг анхныхаасаа
+        жижиг болж, зүүн талдаа амьсгалах зай үлдээнэ.
+        `lg:max-w-full` — маш өндөр цонхон дээр зураг багананаасаа
+        халихаас сэргийлнэ.
+      */}
       <div
         data-hero-image
-        className="absolute inset-0 bg-sand lg:relative lg:order-last lg:aspect-3/4"
+        className="absolute inset-0 bg-sand lg:relative lg:order-last lg:aspect-3/4 lg:h-full lg:w-auto lg:max-w-full lg:justify-self-end"
       >
         <Image
           src={HERO.image}
@@ -59,8 +92,16 @@ export function Hero() {
         />
       </div>
 
-      {/* Текст */}
-      <div className="relative flex min-h-[88svh] flex-col justify-end px-5 pb-16 sm:px-10 lg:min-h-0 lg:justify-center lg:px-14 lg:py-20 xl:px-20">
+      {/*
+        Текст.
+
+        `lg:py-10` (өмнө нь `py-20`) — section нь одоо ТОГТСОН өндөртэй
+        болсон тул босоо зай нь зөвхөн "хамгийн багадаа энэ зайг үлдээ"
+        гэсэн үүрэгтэй. Агуулга голлож байрладаг учир өндөр дэлгэц дээр
+        харагдах байдал нь өөрчлөгдөхгүй, харин НАМХАН цонхон дээр
+        (жишээ нь 1280×640) текст section-оосоо халихаас сэргийлнэ.
+      */}
+      <div className="relative flex min-h-[88svh] flex-col justify-end px-5 pb-16 sm:px-10 lg:min-h-0 lg:justify-center lg:px-14 lg:py-10 xl:px-20">
         <p className="label text-bone/70 lg:text-graphite">elegant babies</p>
 
         <h1 className="mt-5 font-display text-3xl leading-[1.15] font-medium uppercase tracking-label text-bone sm:text-5xl lg:text-ink xl:text-6xl">
